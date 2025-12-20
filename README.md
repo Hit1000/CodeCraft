@@ -1,5 +1,5 @@
 # ✨ CodeCraft - SaaS Code Editor ✨
-
+<img src="./public/home0.png" alt=" " align="center" />
 CodeCraft is a modern, in-browser IDE built with Next.js 15, offering a seamless coding experience with powerful AI capabilities, real-time collaboration features, and a robust backend powered by Convex.
 
 ## Key Features
@@ -94,6 +94,10 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 - `src/components/`: Shared React components used across the application.
 - `src/store/`: Zustand store (`useCodeEditorStore`) for global state management of the editor, file system, and AI features.
 - `src/lib/ai/`: Contains the `OllamaService` for handling communication with the local Ollama AI model.
+
+## Images
+<img src="./public/home.png" alt=" " align="center" />
+<img src="./public/home2.png" alt=" " align="center" />
 
 ## License
 
