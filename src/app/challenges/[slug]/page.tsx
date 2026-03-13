@@ -105,8 +105,7 @@ export default function ChallengeSolvePage() {
     const fullCode = buildExecutableCode(codeToRun, driverTemplate, testCases, language);
 
     try {
-      const pistonUrl = process.env.NEXT_PUBLIC_PISTON_API_URL || "https://emkc.org/api/v2/piston/execute";
-      const response = await fetch(pistonUrl, {
+      const response = await fetch("/api/execute", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

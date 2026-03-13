@@ -18,7 +18,7 @@ export const LANGUAGE_CONFIG: LanguageConfig = {
     id: "javascript",
     label: "JavaScript",
     logoPath: "/javascript.png",
-    pistonRuntime: { language: "javascript", version: "18.15.0" }, // api that we're gonna be using
+    pistonRuntime: { language: "javascript", version: "20.11.1" },
     monacoLanguage: "javascript",
     defaultCode: `// JavaScript Playground
 const numbers = [1, 2, 3, 4, 5];
@@ -77,7 +77,7 @@ console.log('Sum of numbers:', math.sum());`,
     id: "python",
     label: "Python",
     logoPath: "/python.png",
-    pistonRuntime: { language: "python", version: "3.10.0" },
+    pistonRuntime: { language: "python", version: "3.12.0" },
     monacoLanguage: "python",
     defaultCode: `# Python Playground
 numbers = [1, 2, 3, 4, 5]
@@ -135,47 +135,6 @@ print(f"Sum of numbers: {numbers_sum}")`,
       for (int n : arr) System.out.print(n + " ");
       System.out.println();
   }
-}`,
-  },
-  go: {
-    id: "go",
-    label: "Go",
-    logoPath: "/go.png",
-    pistonRuntime: { language: "go", version: "1.16.2" },
-    monacoLanguage: "go",
-    defaultCode: `package main
-
-import "fmt"
-
-func main() {
-  // Create slice
-  numbers := []int{1, 2, 3, 4, 5}
-  
-  // Print original numbers
-  fmt.Println("Original numbers:", numbers)
-  
-  // Calculate squares
-  squares := make([]int, len(numbers))
-  for i, n := range numbers {
-      squares[i] = n * n
-  }
-  fmt.Println("Squared numbers:", squares)
-  
-  // Filter even numbers
-  var evenNumbers []int
-  for _, n := range numbers {
-      if n%2 == 0 {
-          evenNumbers = append(evenNumbers, n)
-      }
-  }
-  fmt.Println("Even numbers:", evenNumbers)
-  
-  // Calculate sum
-  sum := 0
-  for _, n := range numbers {
-      sum += n
-  }
-  fmt.Println("Sum of numbers:", sum)
 }`,
   },
   rust: {
@@ -253,37 +212,6 @@ int main() {
     std::cout << "Sum of numbers: " << sum << std::endl;
     
     return 0;
-}`,
-  },
-  csharp: {
-    id: "csharp",
-    label: "C#",
-    logoPath: "/csharp.png",
-    pistonRuntime: { language: "csharp", version: "6.12.0" },
-    monacoLanguage: "csharp",
-    defaultCode: `using System;
-using System.Linq;
-
-class Program {
-    static void Main() {
-        // Create array
-        int[] numbers = { 1, 2, 3, 4, 5 };
-        
-        // Print original numbers
-        Console.WriteLine($"Original numbers: {string.Join(" ", numbers)}");
-        
-        // Calculate squares
-        var squares = numbers.Select(n => n * n);
-        Console.WriteLine($"Squared numbers: {string.Join(" ", squares)}");
-        
-        // Filter even numbers
-        var evenNumbers = numbers.Where(n => n % 2 == 0);
-        Console.WriteLine($"Even numbers: {string.Join(" ", evenNumbers)}");
-        
-        // Calculate sum
-        var sum = numbers.Sum();
-        Console.WriteLine($"Sum of numbers: {sum}");
-    }
 }`,
   },
   ruby: {

@@ -5,7 +5,7 @@ CodeCraft is a modern, in-browser IDE built with Next.js 15, offering a seamless
 ## Key Features
 
 - **Advanced Code Editor**: Utilizes Monaco Editor, the engine behind VS Code, for a familiar and powerful editing experience with support for 5 themes and customizable font sizes.
-- **Multi-Language Support**: Write and execute code in 10 different languages, including JavaScript, TypeScript, Python, Java, and Rust.
+- **Multi-Language Support**: Write and execute code in 9 different languages, including JavaScript, TypeScript, Python, Java, Go, Rust, C++, Ruby, and Swift.
 - **AI-Powered Assistant**:
     - **AI Chat**: An integrated chat panel to ask questions about your code.
     - **Quick Actions**: Instantly explain, fix, or optimize selected code.
@@ -22,10 +22,22 @@ CodeCraft is a modern, in-browser IDE built with Next.js 15, offering a seamless
 - **Backend & Database**: Convex
 - **Authentication**: Clerk
 - **AI Integration**: Ollama
+- **Code Execution**: Piston (self-hosted via Docker)
 - **UI**: Tailwind CSS & Framer Motion
 - **Code Editor**: Monaco Editor
 - **State Management**: Zustand
 - **Payments**: Lemon Squeezy (via Webhooks)
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed:
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for code execution)
+- [Ollama](https://ollama.com/) (for AI features — optional)
+- Accounts on [Convex](https://convex.dev) and [Clerk](https://clerk.com)
+
+---
 
 ## Getting Started
 
@@ -46,14 +58,14 @@ npm install
 
 ### 3. Set Up Environment Variables
 
-Create a `.env.local` file in the root of your project and add the following variables. Obtain the necessary keys from [Convex](https://convex.dev) and [Clerk](https://clerk.com).
+Create a `.env.local` file in the root of your project and add the following:
 
 ```env
-# Convex Deployment URL
+# Convex Deployment URL (get from convex.dev)
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
 
-# Clerk Authentication Keys
+# Clerk Authentication Keys (get from clerk.com)
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 
@@ -61,39 +73,124 @@ CLERK_SECRET_KEY=
 NEXT_PUBLIC_OLLAMA_ENDPOINT=http://localhost:11434
 NEXT_PUBLIC_AI_MODEL=deepseek-coder:1.3b
 
+# Piston Code Execution (set after completing Step 4 below)
+NEXT_PUBLIC_PISTON_API_URL=http://localhost:2000/api/v2/execute
 
-## optional
+## Optional
 # CLERK_WEBHOOK_SECRET=
 # LEMON_SQUEEZY_WEBHOOK_SECRET=
 ```
 
-### 4. Run the Development Servers
+### 4. Set Up Piston (Code Execution Engine)
 
-You need to run two separate processes in parallel.
+CodeCraft uses [Piston](https://github.com/engineer-man/piston) for secure, sandboxed code execution. You need Docker Desktop running for this step.
 
-**Run the Next.js frontend:**
+#### 4a. Start the Piston container
+
+```bash
+docker compose -f docker-compose.piston.yml up -d
+```
+
+Verify it's running:
+```bash
+docker logs piston_api
+# Should show: API server started on 0.0.0.0:2000
+```
+
+#### 4b. Install language runtimes
+
+Run each command and wait for a JSON response before running the next one (each takes ~30–60 seconds):
+
+```bash
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"node\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"python\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"typescript\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"java\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"go\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"rust\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"gcc\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"ruby\", \"version\": \"*\"}"
+curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"swift\", \"version\": \"*\"}"
+```
+
+#### 4c. Verify installed runtimes
+
+```bash
+curl "http://localhost:2000/api/v2/runtimes"
+```
+
+> **Important:** After installing, check the version numbers returned and make sure they match the `pistonRuntime.version` values in `src/app/(root)/_constants/index.ts`. Update any mismatches.
+
+#### 4d. Test execution
+
+```bash
+curl -X POST http://localhost:2000/api/v2/execute -H "Content-Type: application/json" -d "{\"language\": \"javascript\", \"version\": \"20.11.1\", \"files\": [{\"content\": \"console.log('hello')\"}]}"
+# Expected: {"run":{"stdout":"hello\n",...}}
+```
+
+### 5. Set Up Ollama (AI Features — Optional)
+
+Install [Ollama](https://ollama.com/) and pull a model:
+
+```bash
+ollama pull deepseek-coder:1.3b
+```
+
+Then start Ollama:
+```bash
+ollama serve
+```
+
+### 6. Run the Development Servers
+
+You need to run **three** processes — open separate terminals for each:
+
+**Terminal 1 — Next.js frontend:**
 ```bash
 npm run dev
 ```
 
-**Run the Convex backend:**
+**Terminal 2 — Convex backend:**
 ```bash
 npx convex dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser to see the application.
+**Terminal 3 — Piston (if not already running):**
+```bash
+docker compose -f docker-compose.piston.yml up
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## Piston Management
+
+| Command | Description |
+|---|---|
+| `docker compose -f docker-compose.piston.yml up -d` | Start Piston in background |
+| `docker compose -f docker-compose.piston.yml down` | Stop Piston |
+| `docker logs piston_api` | View Piston logs |
+| `curl "http://localhost:2000/api/v2/runtimes"` | List installed languages |
+
+> **Note:** Piston must be running whenever you use the code execution features. Docker Desktop must also be open.
+
+---
 
 ## Project Structure
 
 - `convex/`: Contains all backend logic, including database schema, queries, mutations, and actions.
 - `src/app/`: The main application code, following the Next.js App Router structure.
   - `(root)/`: The primary editor interface.
+  - `api/execute/`: Server-side proxy route that forwards code to the local Piston instance (avoids CORS).
+  - `challenges/`: Coding challenge pages with test case execution.
   - `profile/`: User profile page with stats and execution history.
   - `snippets/`: Pages for browsing, viewing, and commenting on shared code snippets.
   - `pricing/`: The pricing page for the Pro plan.
 - `src/components/`: Shared React components used across the application.
 - `src/store/`: Zustand store (`useCodeEditorStore`) for global state management of the editor, file system, and AI features.
 - `src/lib/ai/`: Contains the `OllamaService` for handling communication with the local Ollama AI model.
+- `docker-compose.piston.yml`: Docker Compose config for the Piston code execution engine.
 
 ## Images
 <img src="./public/home.png" alt=" " align="center" />
