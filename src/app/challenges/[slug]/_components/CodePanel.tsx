@@ -7,8 +7,8 @@ import { useState, useRef } from "react";
 
 interface CodePanelProps {
   starterCode: {
-    python: string;
-    javascript: string;
+    python?: string;
+    javascript?: string;
     typescript?: string;
     java?: string;
     cpp?: string;

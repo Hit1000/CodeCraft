@@ -54,7 +54,11 @@ export default defineSchema({
     category: v.string(),
     subcategory: v.string(),
     tags: v.array(v.string()),
+
+    // Rich description with markdown + image references
     description: v.string(),
+    descriptionImages: v.optional(v.array(v.id("_storage"))),
+
     examples: v.array(
       v.object({
         input: v.string(),
@@ -63,13 +67,25 @@ export default defineSchema({
       })
     ),
     constraints: v.array(v.string()),
+
+    // What the user sees and edits
     starterCode: v.object({
-      python: v.string(),
-      javascript: v.string(),
+      python: v.optional(v.string()),
+      javascript: v.optional(v.string()),
       typescript: v.optional(v.string()),
       java: v.optional(v.string()),
       cpp: v.optional(v.string()),
     }),
+
+    // Hidden boilerplate/driver code that wraps user's code for execution
+    driverCode: v.optional(v.object({
+      python: v.optional(v.string()),
+      javascript: v.optional(v.string()),
+      typescript: v.optional(v.string()),
+      java: v.optional(v.string()),
+      cpp: v.optional(v.string()),
+    })),
+
     testCases: v.array(
       v.object({
         id: v.string(),
@@ -78,8 +94,11 @@ export default defineSchema({
         isHidden: v.boolean(),
       })
     ),
+
     hints: v.array(v.string()),
     editorial: v.optional(v.string()),
+    editorialImages: v.optional(v.array(v.id("_storage"))),
+
     timeLimit: v.number(),
     memoryLimit: v.number(),
     acceptanceRate: v.number(),
@@ -89,11 +108,17 @@ export default defineSchema({
     dislikes: v.number(),
     order: v.number(),
     isPremium: v.boolean(),
+
+    // Admin tracking
+    createdBy: v.optional(v.string()),
+    updatedBy: v.optional(v.string()),
+    isPublished: v.optional(v.boolean()),
   })
     .index("by_slug", ["slug"])
     .index("by_category", ["category", "difficulty"])
     .index("by_difficulty", ["difficulty"])
-    .index("by_order", ["order"]),
+    .index("by_order", ["order"])
+    .index("by_published", ["isPublished"]),
 
   challengeSubmissions: defineTable({
     userId: v.string(),
@@ -165,4 +190,72 @@ export default defineSchema({
     dsaSolved: v.number(),
     aimlSolved: v.number(),
   }).index("by_user", ["userId"]),
+
+  // Admin roles for challenges
+  challengeAdmins: defineTable({
+    userId: v.string(),
+    role: v.union(v.literal("admin"), v.literal("moderator")),
+    grantedBy: v.string(),
+    grantedAt: v.number(),
+  }).index("by_user", ["userId"]),
+
+  // Community challenge proposals
+  challengeProposals: defineTable({
+    title: v.string(),
+    slug: v.string(),
+    difficulty: v.union(v.literal("Easy"), v.literal("Medium"), v.literal("Hard")),
+    category: v.string(),
+    subcategory: v.string(),
+    tags: v.array(v.string()),
+    description: v.string(),
+    examples: v.array(
+      v.object({
+        input: v.string(),
+        output: v.string(),
+        explanation: v.optional(v.string()),
+      })
+    ),
+    constraints: v.array(v.string()),
+    starterCode: v.object({
+      python: v.optional(v.string()),
+      javascript: v.optional(v.string()),
+      typescript: v.optional(v.string()),
+      java: v.optional(v.string()),
+      cpp: v.optional(v.string()),
+    }),
+    driverCode: v.optional(
+      v.object({
+        python: v.optional(v.string()),
+        javascript: v.optional(v.string()),
+        typescript: v.optional(v.string()),
+        java: v.optional(v.string()),
+        cpp: v.optional(v.string()),
+      })
+    ),
+    testCases: v.array(
+      v.object({
+        id: v.string(),
+        input: v.string(),
+        expectedOutput: v.string(),
+        isHidden: v.boolean(),
+      })
+    ),
+    hints: v.array(v.string()),
+    editorial: v.optional(v.string()),
+    timeLimit: v.number(),
+    memoryLimit: v.number(),
+    order: v.optional(v.number()),
+    isPremium: v.optional(v.boolean()),
+
+    // Proposal workflow
+    status: v.union(v.literal("pending"), v.literal("approved"), v.literal("rejected")),
+    proposedBy: v.string(),
+    proposerName: v.string(),
+    proposedAt: v.number(),
+    reviewedBy: v.optional(v.string()),
+    reviewedAt: v.optional(v.number()),
+    reviewNote: v.optional(v.string()),
+  })
+    .index("by_status", ["status"])
+    .index("by_user", ["proposedBy"]),
 });

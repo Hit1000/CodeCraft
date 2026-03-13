@@ -39,6 +39,9 @@ export const list = query({
         .collect();
     }
 
+    // Only show published challenges (treat missing isPublished as published for old data)
+    challenges = challenges.filter((c) => c.isPublished !== false);
+
     // Apply search filter
     if (args.search) {
       const searchLower = args.search.toLowerCase();
@@ -62,7 +65,7 @@ export const list = query({
       challenges = challenges.filter((c) => c.subcategory === args.subcategory);
     }
 
-    // Return without test case solutions (security)
+    // Return without test case solutions or driver code (security)
     return challenges.map((c) => ({
       _id: c._id,
       title: c.title,
@@ -88,19 +91,53 @@ export const getBySlug = query({
       .withIndex("by_slug", (q) => q.eq("slug", args.slug))
       .unique();
 
-    if (!challenge) return null;
+    if (!challenge || challenge.isPublished === false) return null;
 
-    // Sanitize hidden test cases
-    const sanitizedTestCases = challenge.testCases.map((tc) => ({
-      id: tc.id,
-      input: tc.isHidden ? "Hidden" : tc.input,
-      expectedOutput: tc.isHidden ? "Hidden" : tc.expectedOutput,
-      isHidden: tc.isHidden,
-    }));
-
+    // Sanitize hidden test cases; do NOT expose driverCode to client
     return {
-      ...challenge,
-      testCases: sanitizedTestCases,
+      _id: challenge._id,
+      title: challenge.title,
+      slug: challenge.slug,
+      difficulty: challenge.difficulty,
+      category: challenge.category,
+      subcategory: challenge.subcategory,
+      tags: challenge.tags,
+      description: challenge.description,
+      descriptionImages: challenge.descriptionImages,
+      examples: challenge.examples,
+      constraints: challenge.constraints,
+      starterCode: challenge.starterCode,
+      testCases: challenge.testCases.map((tc) => ({
+        id: tc.id,
+        input: tc.isHidden ? "Hidden" : tc.input,
+        expectedOutput: tc.isHidden ? "Hidden" : tc.expectedOutput,
+        isHidden: tc.isHidden,
+      })),
+      hints: challenge.hints,
+      editorial: challenge.editorial,
+      editorialImages: challenge.editorialImages,
+      timeLimit: challenge.timeLimit,
+      memoryLimit: challenge.memoryLimit,
+      acceptanceRate: challenge.acceptanceRate,
+      totalSubmissions: challenge.totalSubmissions,
+      likes: challenge.likes,
+      dislikes: challenge.dislikes,
+      isPremium: challenge.isPremium,
+      order: challenge.order,
+    };
+  },
+});
+
+// Get driver code + all test cases for execution (called by solver page)
+export const getDriverCode = query({
+  args: { challengeId: v.id("challenges") },
+  handler: async (ctx, args) => {
+    const challenge = await ctx.db.get(args.challengeId);
+    if (!challenge) return null;
+    return {
+      driverCode: challenge.driverCode ?? {},
+      testCases: challenge.testCases,
+      timeLimit: challenge.timeLimit,
     };
   },
 });
@@ -117,13 +154,14 @@ export const getFullTestCases = query({
 export const getCategories = query({
   handler: async (ctx) => {
     const challenges = await ctx.db.query("challenges").collect();
+    const published = challenges.filter((c) => c.isPublished !== false);
 
     const categoryMap: Record<
       string,
       { count: number; subcategories: Set<string>; easy: number; medium: number; hard: number }
     > = {};
 
-    for (const c of challenges) {
+    for (const c of published) {
       if (!categoryMap[c.category]) {
         categoryMap[c.category] = {
           count: 0,

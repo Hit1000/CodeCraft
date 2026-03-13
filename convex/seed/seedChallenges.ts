@@ -34,17 +34,20 @@ export const seedChallenges = internalMutation({
           "Only one valid answer exists.",
         ],
         starterCode: {
-          python: `def solution(nums: list[int], target: int) -> list[int]:\n    """\n    Find two numbers that add up to target.\n    Return their indices.\n    """\n    # Your code here\n    pass`,
+          python: `def solution(nums, target):\n    """\n    Find two numbers that add up to target.\n    Return their indices.\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(nums, target) {\n    // Find two numbers that add up to target\n    // Return their indices\n}`,
           typescript: `function solution(nums: number[], target: number): number[] {\n    // Find two numbers that add up to target\n    // Return their indices\n}`,
-          java: `class Solution {\n    public int[] solution(int[] nums, int target) {\n        // Your code here\n        return new int[]{};\n    }\n}`,
+        },
+        driverCode: {
+          python: `_result = solution({{TEST_INPUT}})\nif sorted(_result) == sorted({{EXPECTED_OUTPUT}}):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={{EXPECTED_OUTPUT}}:actual={_result}:0")`,
+          javascript: `const _result = solution(...{{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (JSON.stringify(_result.sort()) === JSON.stringify(_expected.sort())) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + JSON.stringify(_expected) + ":actual=" + JSON.stringify(_result) + ":0");\n}`,
         },
         testCases: [
-          { id: "tc1", input: "[2,7,11,15]\\n9", expectedOutput: "[0,1]", isHidden: false },
-          { id: "tc2", input: "[3,2,4]\\n6", expectedOutput: "[1,2]", isHidden: false },
-          { id: "tc3", input: "[3,3]\\n6", expectedOutput: "[0,1]", isHidden: false },
-          { id: "tc4", input: "[1,5,3,7,2,8]\\n10", expectedOutput: "[1,3]", isHidden: true },
-          { id: "tc5", input: "[-1,-2,-3,-4,-5]\\n-8", expectedOutput: "[2,4]", isHidden: true },
+          { id: "tc1", input: "[2,7,11,15], 9", expectedOutput: "[0,1]", isHidden: false },
+          { id: "tc2", input: "[3,2,4], 6", expectedOutput: "[1,2]", isHidden: false },
+          { id: "tc3", input: "[3,3], 6", expectedOutput: "[0,1]", isHidden: false },
+          { id: "tc4", input: "[1,5,3,7,2,8], 10", expectedOutput: "[1,3]", isHidden: true },
+          { id: "tc5", input: "[-1,-2,-3,-4,-5], -8", expectedOutput: "[2,4]", isHidden: true },
         ],
         hints: [
           "A brute force approach would be O(n²). Can you do better?",
@@ -61,6 +64,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 1,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
       {
         title: "Valid Parentheses",
@@ -80,8 +85,12 @@ export const seedChallenges = internalMutation({
           "s consists of parentheses only '()[]{}'",
         ],
         starterCode: {
-          python: `def solution(s: str) -> bool:\n    """\n    Determine if the input string has valid parentheses.\n    """\n    # Your code here\n    pass`,
+          python: `def solution(s):\n    """\n    Determine if the input string has valid parentheses.\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(s) {\n    // Determine if the input string has valid parentheses\n}`,
+        },
+        driverCode: {
+          python: `_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif str(_result).lower() == str(_expected).lower():\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_expected}:actual={_result}:0")`,
+          javascript: `const _result = solution({{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (String(_result) === String(_expected)) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + _expected + ":actual=" + _result + ":0");\n}`,
         },
         testCases: [
           { id: "tc1", input: '"()"', expectedOutput: "true", isHidden: false },
@@ -103,6 +112,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 2,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
       {
         title: "Merge Two Sorted Lists",
@@ -122,14 +133,18 @@ export const seedChallenges = internalMutation({
           "Both lists are sorted in non-decreasing order",
         ],
         starterCode: {
-          python: `def solution(list1: list[int], list2: list[int]) -> list[int]:\n    """\n    Merge two sorted lists into one sorted list.\n    """\n    # Your code here\n    pass`,
+          python: `def solution(list1, list2):\n    """\n    Merge two sorted lists into one sorted list.\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(list1, list2) {\n    // Merge two sorted lists into one sorted list\n}`,
         },
+        driverCode: {
+          python: `_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif list(_result) == list(_expected):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_expected}:actual={_result}:0")`,
+          javascript: `const _result = solution(...{{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (JSON.stringify(_result) === JSON.stringify(_expected)) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + JSON.stringify(_expected) + ":actual=" + JSON.stringify(_result) + ":0");\n}`,
+        },
         testCases: [
-          { id: "tc1", input: "[1,2,4]\\n[1,3,4]", expectedOutput: "[1,1,2,3,4,4]", isHidden: false },
-          { id: "tc2", input: "[]\\n[0]", expectedOutput: "[0]", isHidden: false },
-          { id: "tc3", input: "[]\\n[]", expectedOutput: "[]", isHidden: true },
-          { id: "tc4", input: "[1,3,5,7]\\n[2,4,6,8]", expectedOutput: "[1,2,3,4,5,6,7,8]", isHidden: true },
+          { id: "tc1", input: "[1,2,4], [1,3,4]", expectedOutput: "[1,1,2,3,4,4]", isHidden: false },
+          { id: "tc2", input: "[], [0]", expectedOutput: "[0]", isHidden: false },
+          { id: "tc3", input: "[], []", expectedOutput: "[]", isHidden: true },
+          { id: "tc4", input: "[1,3,5,7], [2,4,6,8]", expectedOutput: "[1,2,3,4,5,6,7,8]", isHidden: true },
         ],
         hints: [
           "Use two pointers, one for each list.",
@@ -144,6 +159,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 3,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
       {
         title: "Binary Search",
@@ -171,14 +188,18 @@ export const seedChallenges = internalMutation({
           "nums is sorted in ascending order",
         ],
         starterCode: {
-          python: `def solution(nums: list[int], target: int) -> int:\n    """\n    Find target in sorted array using binary search.\n    Return index or -1 if not found.\n    """\n    # Your code here\n    pass`,
+          python: `def solution(nums, target):\n    """\n    Find target in sorted array using binary search.\n    Return index or -1 if not found.\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(nums, target) {\n    // Find target in sorted array using binary search\n    // Return index or -1 if not found\n}`,
         },
+        driverCode: {
+          python: `_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif _result == _expected:\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_expected}:actual={_result}:0")`,
+          javascript: `const _result = solution(...{{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (_result === _expected) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + _expected + ":actual=" + _result + ":0");\n}`,
+        },
         testCases: [
-          { id: "tc1", input: "[-1,0,3,5,9,12]\\n9", expectedOutput: "4", isHidden: false },
-          { id: "tc2", input: "[-1,0,3,5,9,12]\\n2", expectedOutput: "-1", isHidden: false },
-          { id: "tc3", input: "[5]\\n5", expectedOutput: "0", isHidden: true },
-          { id: "tc4", input: "[1,2,3,4,5,6,7,8,9,10]\\n7", expectedOutput: "6", isHidden: true },
+          { id: "tc1", input: "[-1,0,3,5,9,12], 9", expectedOutput: "4", isHidden: false },
+          { id: "tc2", input: "[-1,0,3,5,9,12], 2", expectedOutput: "-1", isHidden: false },
+          { id: "tc3", input: "[5], 5", expectedOutput: "0", isHidden: true },
+          { id: "tc4", input: "[1,2,3,4,5,6,7,8,9,10], 7", expectedOutput: "6", isHidden: true },
         ],
         hints: [
           "Use two pointers for left and right bounds.",
@@ -193,6 +214,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 4,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
       {
         title: "Maximum Subarray (Kadane's Algorithm)",
@@ -215,8 +238,12 @@ export const seedChallenges = internalMutation({
           "-10^4 <= nums[i] <= 10^4",
         ],
         starterCode: {
-          python: `def solution(nums: list[int]) -> int:\n    """\n    Find the contiguous subarray with the largest sum.\n    """\n    # Your code here\n    pass`,
+          python: `def solution(nums):\n    """\n    Find the contiguous subarray with the largest sum.\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(nums) {\n    // Find the contiguous subarray with the largest sum\n}`,
+        },
+        driverCode: {
+          python: `_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif _result == _expected:\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_expected}:actual={_result}:0")`,
+          javascript: `const _result = solution({{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (_result === _expected) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + _expected + ":actual=" + _result + ":0");\n}`,
         },
         testCases: [
           { id: "tc1", input: "[-2,1,-3,4,-1,2,1,-5,4]", expectedOutput: "6", isHidden: false },
@@ -238,6 +265,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 5,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
 
       // ==================== AI/ML PROBLEMS ====================
@@ -267,10 +296,13 @@ export const seedChallenges = internalMutation({
           python: `import numpy as np\n\ndef solution(X, y):\n    """\n    Implement linear regression using the normal equation.\n    \n    Args:\n        X: numpy array of shape (n_samples, n_features) \n        y: numpy array of shape (n_samples,)\n    \n    Returns:\n        predictions: numpy array of shape (n_samples,)\n    """\n    # Your code here\n    pass`,
           javascript: `// This problem requires NumPy - please use Python\nfunction solution(X, y) {\n    throw new Error("Please solve this problem in Python");\n}`,
         },
+        driverCode: {
+          python: `import numpy as np\n_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif np.allclose(np.array(_result), np.array(_expected), rtol=1e-5):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={list(_expected)}:actual={list(_result)}:0")`,
+        },
         testCases: [
-          { id: "tc1", input: "np.array([[1],[2],[3]])\\nnp.array([2,4,6])", expectedOutput: "np.array([2.0, 4.0, 6.0])", isHidden: false },
-          { id: "tc2", input: "np.array([[1],[2],[3],[4]])\\nnp.array([1,3,5,7])", expectedOutput: "np.array([1.0, 3.0, 5.0, 7.0])", isHidden: false },
-          { id: "tc3", input: "np.array([[0],[1],[2],[3],[4]])\\nnp.array([1,1,1,1,1])", expectedOutput: "np.array([1.0,1.0,1.0,1.0,1.0])", isHidden: true },
+          { id: "tc1", input: "np.array([[1],[2],[3]]), np.array([2,4,6])", expectedOutput: "np.array([2.0, 4.0, 6.0])", isHidden: false },
+          { id: "tc2", input: "np.array([[1],[2],[3],[4]]), np.array([1,3,5,7])", expectedOutput: "np.array([1.0, 3.0, 5.0, 7.0])", isHidden: false },
+          { id: "tc3", input: "np.array([[0],[1],[2],[3],[4]]), np.array([1,1,1,1,1])", expectedOutput: "np.array([1.0,1.0,1.0,1.0,1.0])", isHidden: true },
         ],
         hints: [
           "Add a bias column: X_b = np.c_[np.ones((X.shape[0], 1)), X]",
@@ -287,6 +319,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 101,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
       {
         title: "Sigmoid Activation Function",
@@ -314,6 +348,9 @@ export const seedChallenges = internalMutation({
           python: `import numpy as np\n\ndef solution(x):\n    """\n    Compute sigmoid and its derivative.\n    \n    Args:\n        x: numpy array\n    \n    Returns:\n        tuple: (sigmoid(x), sigmoid_derivative(x))\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(x) {\n    // Please solve this problem in Python\n}`,
         },
+        driverCode: {
+          python: `import numpy as np\n_sig, _der = solution({{TEST_INPUT}})\n_e_sig, _e_der = {{EXPECTED_OUTPUT}}\nif np.allclose(_sig, _e_sig, rtol=1e-5) and np.allclose(_der, _e_der, rtol=1e-5):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected=({list(_e_sig)},{list(_e_der)}):actual=({list(_sig)},{list(_der)}):0")`,
+        },
         testCases: [
           { id: "tc1", input: "np.array([0.0])", expectedOutput: "(np.array([0.5]), np.array([0.25]))", isHidden: false },
           { id: "tc2", input: "np.array([1.0, -1.0])", expectedOutput: "(np.array([0.7310585, 0.2689414]), np.array([0.1966119, 0.1966119]))", isHidden: false },
@@ -332,6 +369,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 102,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
       {
         title: "K-Nearest Neighbors Classifier",
@@ -358,10 +397,13 @@ export const seedChallenges = internalMutation({
           python: `import numpy as np\n\ndef solution(X_train, y_train, X_test, k):\n    """\n    Implement KNN classifier.\n    \n    Args:\n        X_train: numpy array (n_train, n_features)\n        y_train: numpy array (n_train,)\n        X_test: numpy array (n_test, n_features)\n        k: int, number of neighbors\n    \n    Returns:\n        predictions: numpy array (n_test,)\n    """\n    # Your code here\n    pass`,
           javascript: `function solution(X_train, y_train, X_test, k) {\n    // Please solve this problem in Python\n}`,
         },
+        driverCode: {
+          python: `import numpy as np\n_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif np.array_equal(np.array(_result), np.array(_expected)):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={list(_expected)}:actual={list(_result)}:0")`,
+        },
         testCases: [
-          { id: "tc1", input: "np.array([[0,0],[1,1],[2,2]])\\nnp.array([0,0,1])\\nnp.array([[0.5,0.5]])\\n2", expectedOutput: "np.array([0])", isHidden: false },
-          { id: "tc2", input: "np.array([[0,0],[1,1],[2,2],[3,3]])\\nnp.array([0,0,1,1])\\nnp.array([[1.5,1.5]])\\n3", expectedOutput: "np.array([1])", isHidden: false },
-          { id: "tc3", input: "np.array([[0],[1],[2],[3],[4],[5]])\\nnp.array([0,0,0,1,1,1])\\nnp.array([[2.5]])\\n5", expectedOutput: "np.array([0])", isHidden: true },
+          { id: "tc1", input: "np.array([[0,0],[1,1],[2,2]]), np.array([0,0,1]), np.array([[0.5,0.5]]), 2", expectedOutput: "np.array([0])", isHidden: false },
+          { id: "tc2", input: "np.array([[0,0],[1,1],[2,2],[3,3]]), np.array([0,0,1,1]), np.array([[1.5,1.5]]), 3", expectedOutput: "np.array([1])", isHidden: false },
+          { id: "tc3", input: "np.array([[0],[1],[2],[3],[4],[5]]), np.array([0,0,0,1,1,1]), np.array([[2.5]]), 5", expectedOutput: "np.array([0])", isHidden: true },
         ],
         hints: [
           "Compute distances: np.linalg.norm(X_test[:, np.newaxis] - X_train, axis=2)",
@@ -377,6 +419,8 @@ export const seedChallenges = internalMutation({
         dislikes: 0,
         order: 103,
         isPremium: false,
+        isPublished: true,
+        createdBy: "system",
       },
     ];
 

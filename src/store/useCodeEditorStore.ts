@@ -161,7 +161,8 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
 
       try {
         const runtime = LANGUAGE_CONFIG[language].pistonRuntime;
-        const response = await fetch("https://emkc.org/api/v2/piston/execute", {
+        const pistonUrl = process.env.NEXT_PUBLIC_PISTON_API_URL || "https://emkc.org/api/v2/piston/execute";
+        const response = await fetch(pistonUrl, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

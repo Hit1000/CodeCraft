@@ -74,3 +74,46 @@ export const upgradeToPro = mutation({
     return { success: true };
   },
 });
+
+// Ensure user exists in Convex — called on app load to backfill missing users
+export const ensureUser = mutation({
+  args: {
+    userId: v.string(),
+    email: v.string(),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const existing = await ctx.db
+      .query("users")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
+      .unique();
+
+    if (existing) {
+      // Update name/email if changed in Clerk
+      if (existing.email !== args.email || existing.name !== args.name) {
+        await ctx.db.patch(existing._id, {
+          email: args.email,
+          name: args.name,
+        });
+      }
+      return existing._id;
+    }
+
+    // Create new user
+    return ctx.db.insert("users", {
+      userId: args.userId,
+      email: args.email,
+      name: args.name,
+      isPro: false,
+      isCheater: false,
+    });
+  },
+});
+
+// List all users (for admin panel)
+export const listAllUsers = query({
+  handler: async (ctx) => {
+    return ctx.db.query("users").collect();
+  },
+});
+

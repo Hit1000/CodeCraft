@@ -1,6 +1,6 @@
 import HeaderProfileBtn from "@/app/(root)/_components/HeaderProfileBtn";
 import { SignedOut } from "@clerk/nextjs";
-import { Blocks, Code2, Sparkles, Swords, Trophy } from "lucide-react";
+import { Blocks, Code2, Lightbulb, Sparkles, Swords, Trophy } from "lucide-react";
 import Link from "next/link";
 
 function NavigationHeader() {
@@ -65,6 +65,22 @@ function NavigationHeader() {
               <Swords className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
               <span className="text-sm font-medium relative z-10 group-hover:text-white transition-colors">
                 Challenges
+              </span>
+            </Link>
+
+            {/* Propose Link */}
+            <Link
+              href="/challenges/propose"
+              className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 hover:bg-purple-500/10 
+              border border-gray-800 hover:border-purple-500/50 transition-all duration-300 shadow-lg overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-purple-500/10 
+              to-violet-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+              <Lightbulb className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
+              <span className="text-sm font-medium relative z-10 group-hover:text-white transition-colors">
+                Propose
               </span>
             </Link>
 
