@@ -7,9 +7,10 @@ CodeCraft is a modern, in-browser IDE built with Next.js 15, offering a seamless
 - **Advanced Code Editor**: Utilizes Monaco Editor, the engine behind VS Code, for a familiar and powerful editing experience with support for 5 themes and customizable font sizes.
 - **Multi-Language Support**: Write and execute code in 9 different languages, including JavaScript, TypeScript, Python, Java, Go, Rust, C++, Ruby, and Swift.
 - **AI-Powered Assistant**:
-    - **AI Chat**: An integrated chat panel to ask questions about your code.
-    - **Quick Actions**: Instantly explain, fix, or optimize selected code.
-    - **AI Autocomplete**: Intelligent, inline code suggestions powered by Ollama.
+  - **AI Chat**: An integrated chat panel to ask questions about your code.
+  - **Quick Actions**: Instantly explain, fix, or optimize selected code.
+  - **AI Autocomplete**: Intelligent, inline code suggestions powered by Ollama.
+- **Coding Challenges (DSA & AI/ML)**: Practice curated Data Structures & Algorithms and AI/ML-focused problems with hidden/visible test cases, difficulty and topic filters, progress tracking, and a competitive leaderboard.
 - **Virtual File System**: Manage your project with a built-in file explorer that supports files and folders, with state persisted in local storage.
 - **Code Snippet Sharing**: Share your code with the community by creating snippets. Others can view, comment on, and star your work.
 - **User Profiles & Stats**: Track your coding activity with a personal profile page displaying execution history, favorite languages, and starred snippets.
@@ -106,7 +107,6 @@ curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"python\", \"version\": \"*\"}"
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"typescript\", \"version\": \"*\"}"
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"java\", \"version\": \"*\"}"
-curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"go\", \"version\": \"*\"}"
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"rust\", \"version\": \"*\"}"
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"gcc\", \"version\": \"*\"}"
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"ruby\", \"version\": \"*\"}"
@@ -183,7 +183,7 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `src/app/`: The main application code, following the Next.js App Router structure.
   - `(root)/`: The primary editor interface.
   - `api/execute/`: Server-side proxy route that forwards code to the local Piston instance (avoids CORS).
-  - `challenges/`: Coding challenge pages with test case execution.
+  - `challenges/`: Coding challenge pages with DSA & AI/ML problems, tagged by category/difficulty, with test case execution, progress tracking, and editorial/leaderboard views.
   - `profile/`: User profile page with stats and execution history.
   - `snippets/`: Pages for browsing, viewing, and commenting on shared code snippets.
   - `pricing/`: The pricing page for the Pro plan.
@@ -191,6 +191,26 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `src/store/`: Zustand store (`useCodeEditorStore`) for global state management of the editor, file system, and AI features.
 - `src/lib/ai/`: Contains the `OllamaService` for handling communication with the local Ollama AI model.
 - `docker-compose.piston.yml`: Docker Compose config for the Piston code execution engine.
+
+## Coding Challenges (DSA & AI/ML)
+
+The `challenges` section of CodeCraft turns the editor into a practice platform for both classic DSA and modern AI/ML-style coding problems.
+
+- **Curated problem sets**:
+  - Problems are organized by **category** (for example, DSA vs AI/ML domains), **subcategory**, and **difficulty** (`Easy`, `Medium`, `Hard`).
+  - Each challenge includes constraints, examples, hints, and optional editorial content.
+- **Judge & test cases**:
+  - Solve challenges directly in the in-browser editor using language-specific **starter code**.
+  - Run your solution against **visible test cases** to debug, then submit against all cases (including hidden ones) for final verdicts like *Accepted*, *Wrong Answer*, or *Runtime Error*.
+- **Progress tracking & filters**:
+  - Your attempts, last submitted code, and status (`todo`, `attempted`, `solved`, `bookmarked`) are tracked per challenge.
+  - Use rich filters (search, difficulty, category, subcategory, tags, status) to focus on DSA-only sets, AI/ML-only sets, or specific topics.
+- **Leaderboard & stats**:
+  - A dedicated **leaderboard** ranks users by points, solved count, streaks, and separate totals for **DSA** vs **AI/ML** problems.
+  - Personalized stats show how many challenges you have solved overall and by difficulty.
+- **Community challenge proposals**:
+  - Any logged-in user can **propose new challenges** (including DSA or AI/ML problems) with starter code, driver code, and full test cases.
+  - Admins review proposals, approve them into the main challenge set, and manage publication/order.
 
 ## Images
 <img src="./public/home.png" alt=" " align="center" />
