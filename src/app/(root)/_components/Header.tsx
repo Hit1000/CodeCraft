@@ -2,7 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
-import { Blocks, Code2, LogIn, Sparkles } from "lucide-react";
+import { Blocks, Code2, LogIn, Sparkles, Swords } from "lucide-react";
 import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
 import ThemeSelector from "./ThemeSelector";
 import LanguageSelector from "./LanguageSelector";
@@ -69,6 +69,23 @@ async function Header() {
                  transition-colors"
               >
                 Snippets
+              </span>
+            </Link>
+            <Link
+              href="/challenges"
+              className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 
+                hover:bg-emerald-500/10 border border-gray-800 hover:border-emerald-500/50 transition-all duration-300 shadow-lg overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 
+                to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+              <Swords className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
+              <span
+                className="text-sm font-medium relative z-10 group-hover:text-white
+                 transition-colors"
+              >
+                Challenges
               </span>
             </Link>
           </nav>

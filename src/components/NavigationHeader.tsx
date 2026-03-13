@@ -1,6 +1,6 @@
 import HeaderProfileBtn from "@/app/(root)/_components/HeaderProfileBtn";
 import { SignedOut } from "@clerk/nextjs";
-import { Blocks, Code2, Sparkles } from "lucide-react";
+import { Blocks, Code2, Sparkles, Swords, Trophy } from "lucide-react";
 import Link from "next/link";
 
 function NavigationHeader() {
@@ -49,6 +49,38 @@ function NavigationHeader() {
               <Code2 className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
               <span className="text-sm font-medium relative z-10 group-hover:text-white transition-colors">
                 Snippets
+              </span>
+            </Link>
+
+            {/* Challenges Link */}
+            <Link
+              href="/challenges"
+              className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 hover:bg-emerald-500/10 
+              border border-gray-800 hover:border-emerald-500/50 transition-all duration-300 shadow-lg overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 
+              to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+              <Swords className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
+              <span className="text-sm font-medium relative z-10 group-hover:text-white transition-colors">
+                Challenges
+              </span>
+            </Link>
+
+            {/* Leaderboard Link */}
+            <Link
+              href="/leaderboard"
+              className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 hover:bg-amber-500/10 
+              border border-gray-800 hover:border-amber-500/50 transition-all duration-300 shadow-lg overflow-hidden"
+            >
+              <div
+                className="absolute inset-0 bg-gradient-to-r from-amber-500/10 
+              to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+              <Trophy className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
+              <span className="text-sm font-medium relative z-10 group-hover:text-white transition-colors">
+                Leaderboard
               </span>
             </Link>
           </div>
