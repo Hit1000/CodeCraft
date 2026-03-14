@@ -9,9 +9,7 @@ services:
         ports:
             - 2000:2000
         volumes:
-            - piston-packages:/piston/packages
+            - ./data/piston/packages:/piston/packages
         tmpfs:
             - /tmp:exec
 
-volumes:
-    piston-packages:
