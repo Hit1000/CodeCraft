@@ -40,7 +40,7 @@ export const seedChallenges = internalMutation({
         },
         driverCode: {
           python: `_result = solution({{TEST_INPUT}})\nif sorted(_result) == sorted({{EXPECTED_OUTPUT}}):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={{EXPECTED_OUTPUT}}:actual={_result}:0")`,
-          javascript: `const _result = solution(...{{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (JSON.stringify(_result.sort()) === JSON.stringify(_expected.sort())) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + JSON.stringify(_expected) + ":actual=" + JSON.stringify(_result) + ":0");\n}`,
+          javascript: `const _result = solution({{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (JSON.stringify(_result.sort((a,b)=>a-b)) === JSON.stringify(_expected.sort((a,b)=>a-b))) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + JSON.stringify(_expected) + ":actual=" + JSON.stringify(_result) + ":0");\n}`,
         },
         testCases: [
           { id: "tc1", input: "[2,7,11,15], 9", expectedOutput: "[0,1]", isHidden: false },
@@ -138,7 +138,7 @@ export const seedChallenges = internalMutation({
         },
         driverCode: {
           python: `_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif list(_result) == list(_expected):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_expected}:actual={_result}:0")`,
-          javascript: `const _result = solution(...{{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (JSON.stringify(_result) === JSON.stringify(_expected)) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + JSON.stringify(_expected) + ":actual=" + JSON.stringify(_result) + ":0");\n}`,
+          javascript: `const _result = solution({{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (JSON.stringify(_result) === JSON.stringify(_expected)) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + JSON.stringify(_expected) + ":actual=" + JSON.stringify(_result) + ":0");\n}`,
         },
         testCases: [
           { id: "tc1", input: "[1,2,4], [1,3,4]", expectedOutput: "[1,1,2,3,4,4]", isHidden: false },
@@ -193,7 +193,7 @@ export const seedChallenges = internalMutation({
         },
         driverCode: {
           python: `_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif _result == _expected:\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_expected}:actual={_result}:0")`,
-          javascript: `const _result = solution(...{{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (_result === _expected) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + _expected + ":actual=" + _result + ":0");\n}`,
+          javascript: `const _result = solution({{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (_result === _expected) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + _expected + ":actual=" + _result + ":0");\n}`,
         },
         testCases: [
           { id: "tc1", input: "[-1,0,3,5,9,12], 9", expectedOutput: "4", isHidden: false },
@@ -297,7 +297,7 @@ export const seedChallenges = internalMutation({
           javascript: `// This problem requires NumPy - please use Python\nfunction solution(X, y) {\n    throw new Error("Please solve this problem in Python");\n}`,
         },
         driverCode: {
-          python: `import numpy as np\n_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\nif np.allclose(np.array(_result), np.array(_expected), rtol=1e-5):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={list(_expected)}:actual={list(_result)}:0")`,
+          python: `import numpy as np\n_result = solution({{TEST_INPUT}})\n_expected = {{EXPECTED_OUTPUT}}\n_a = np.asarray(_result, dtype=np.float64)\n_b = np.asarray(_expected, dtype=np.float64)\nif np.allclose(_a, _b, rtol=1e-5):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected={_b.tolist()}:actual={_a.tolist()}:0")`,
         },
         testCases: [
           { id: "tc1", input: "np.array([[1],[2],[3]]), np.array([2,4,6])", expectedOutput: "np.array([2.0, 4.0, 6.0])", isHidden: false },
@@ -349,7 +349,7 @@ export const seedChallenges = internalMutation({
           javascript: `function solution(x) {\n    // Please solve this problem in Python\n}`,
         },
         driverCode: {
-          python: `import numpy as np\n_sig, _der = solution({{TEST_INPUT}})\n_e_sig, _e_der = {{EXPECTED_OUTPUT}}\nif np.allclose(_sig, _e_sig, rtol=1e-5) and np.allclose(_der, _e_der, rtol=1e-5):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected=({list(_e_sig)},{list(_e_der)}):actual=({list(_sig)},{list(_der)}):0")`,
+          python: `import numpy as np\n_sig, _der = solution({{TEST_INPUT}})\n_e_sig, _e_der = {{EXPECTED_OUTPUT}}\n_sig = np.asarray(_sig, dtype=np.float64)\n_der = np.asarray(_der, dtype=np.float64)\n_e_sig = np.asarray(_e_sig, dtype=np.float64)\n_e_der = np.asarray(_e_der, dtype=np.float64)\nif np.allclose(_sig, _e_sig, rtol=1e-5) and np.allclose(_der, _e_der, rtol=1e-5):\n    print(f"PASS:{{TEST_ID}}:0")\nelse:\n    print(f"FAIL:{{TEST_ID}}:expected=({_e_sig.tolist()},{_e_der.tolist()}):actual=({_sig.tolist()},{_der.tolist()}):0")`,
         },
         testCases: [
           { id: "tc1", input: "np.array([0.0])", expectedOutput: "(np.array([0.5]), np.array([0.25]))", isHidden: false },

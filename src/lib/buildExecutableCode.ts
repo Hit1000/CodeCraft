@@ -81,7 +81,10 @@ function buildPythonCode(
     const tc = testCases[i];
     
     // Format input replacing newlines with commas to handle multi-line arguments
-    const formattedInput = tc.input.trim().replace(/\n/g, ", ");
+    // Handles actual newline chars (\n, \r\n, \r) and literal \n text
+    let formattedInput = tc.input.trim()
+      .replace(/[\r\n]+/g, ", ")      // actual newline characters
+      .replace(/\\n/g, ", ");          // literal \n text
 
     if (driverTemplate && driverTemplate.trim()) {
       // Use custom driver template
@@ -133,8 +136,11 @@ function buildJSCode(
     const tc = testCases[i];
     
     // Format input: replace newlines with commas to handle multiple arguments
+    // Handles actual newline chars (\n, \r\n, \r) and literal \n text
     // e.g., "[2,7,11,15]\n9" -> "[2,7,11,15], 9"
-    const formattedInput = tc.input.trim().replace(/\n/g, ", ");
+    let formattedInput = tc.input.trim()
+      .replace(/[\r\n]+/g, ", ")      // actual newline characters (CR, LF)
+      .replace(/\\n/g, ", ");         // literal \n text (backslash followed by n)
 
     if (driverTemplate && driverTemplate.trim()) {
       // Backward compatibility: some seeded challenges had ...{{TEST_INPUT}} which is invalid JS 

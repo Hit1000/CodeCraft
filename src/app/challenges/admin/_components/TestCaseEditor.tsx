@@ -93,7 +93,7 @@ export default function TestCaseEditor({ testCases, onChange }: TestCaseEditorPr
                 <textarea
                   value={tc.input}
                   onChange={(e) => updateTestCase(index, "input", e.target.value)}
-                  placeholder='e.g. [2,7,11,15], 9'
+                  placeholder='e.g. [2,7,11,15], 9 (comma-separated args)'
                   className="w-full bg-gray-900/60 border border-gray-700/50 rounded-lg px-3 py-2 text-sm text-white font-mono placeholder-gray-600 focus:outline-none focus:ring-1 focus:ring-blue-500/50 resize-none"
                   rows={2}
                 />
