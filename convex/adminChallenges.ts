@@ -278,11 +278,13 @@ export const deleteChallenge = mutation({
     }
 
     // Delete associated progress
-    const progress = await ctx.db.query("challengeProgress").collect();
+    const progress = await ctx.db
+      .query("challengeProgress")
+      .withIndex("by_challenge", (q) => q.eq("challengeId", args.challengeId))
+      .collect();
+
     for (const p of progress) {
-      if (p.challengeId === args.challengeId) {
-        await ctx.db.delete(p._id);
-      }
+      await ctx.db.delete(p._id);
     }
 
     await ctx.db.delete(args.challengeId);

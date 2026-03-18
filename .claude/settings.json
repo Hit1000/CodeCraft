@@ -1,0 +1,7 @@
+{
+  "env": {
+    "NEXT_PUBLIC_PISTON_API_URL": "http://localhost:2000/api/v2/execute",
+    "NEXT_PUBLIC_OLLAMA_ENDPOINT": "http://localhost:11434",
+    "NEXT_PUBLIC_AI_MODEL": "deepseek-coder:1.3b"
+  }
+}

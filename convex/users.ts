@@ -1,6 +1,31 @@
 import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 
+/**
+ * Require the caller to be an admin user.
+ * Throws "Forbidden" if the caller is not an admin.
+ */
+export const requireAdmin = async (ctx: any) => {
+  const identity = await ctx.auth.getUserIdentity();
+
+  if (!identity) {
+    throw new Error("Unauthenticated");
+  }
+
+  const caller = await ctx.db
+    .query("users")
+    .withIndex("by_user_id", (q: any) => q.eq("userId", identity.subject))
+    .first();
+
+  if (!caller) {
+    throw new Error("User not found");
+  }
+
+  if (caller.role !== "admin") {
+    throw new Error("Forbidden");
+  }
+};
+
 export const syncUser = mutation({
   args: {
     userId: v.string(),
@@ -10,7 +35,7 @@ export const syncUser = mutation({
   handler: async (ctx, args) => {
     const existingUser = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
       .first();
 
     if (!existingUser) {
@@ -33,8 +58,7 @@ export const getUser = query({
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_user_id")
-      .filter((q) => q.eq(q.field("userId"), args.userId))
+      .withIndex("by_user_id", (q) => q.eq("userId", args.userId))
       .first();
 
     if (!user) return null;
@@ -56,10 +80,13 @@ export const upgradeToPro = mutation({
     isCheater: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
+    // Require admin privileges
+    await requireAdmin(ctx);
+
     const user = await ctx.db
       .query("users")
-      .filter((q) => q.eq(q.field("email"), args.email))
-      .first();
+      .withIndex("by_email", (q) => q.eq("email", args.email))
+      .unique();
 
     if (!user) throw new Error("User not found");
 
@@ -69,6 +96,30 @@ export const upgradeToPro = mutation({
       lemonSqueezyCustomerId: args.lemonSqueezyCustomerId,
       lemonSqueezyOrderId: args.lemonSqueezyOrderId,
       isCheater: args.isCheater ?? user.isCheater ?? false,
+    });
+
+    return { success: true };
+  },
+});
+
+export const setUserRole = mutation({
+  args: {
+    targetUserId: v.string(),
+    role: v.union(v.literal("user"), v.literal("moderator"), v.literal("admin")),
+  },
+  handler: async (ctx, args) => {
+    // Require admin privileges
+    await requireAdmin(ctx);
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_user_id", (q) => q.eq("userId", args.targetUserId))
+      .first();
+
+    if (!user) throw new Error("User not found");
+
+    await ctx.db.patch(user._id, {
+      role: args.role,
     });
 
     return { success: true };
@@ -113,6 +164,9 @@ export const ensureUser = mutation({
 // List all users (for admin panel)
 export const listAllUsers = query({
   handler: async (ctx) => {
+    // Require admin privileges
+    await requireAdmin(ctx);
+
     return ctx.db.query("users").collect();
   },
 });

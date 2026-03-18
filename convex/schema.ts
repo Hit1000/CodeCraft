@@ -2,7 +2,7 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
-  // ========== EXISTING TABLES ==========
+  // ========== USER TABLES ==========
   users: defineTable({
     userId: v.string(), // clerkId
     email: v.string(),
@@ -12,16 +12,11 @@ export default defineSchema({
     proSince: v.optional(v.number()),
     lemonSqueezyCustomerId: v.optional(v.string()),
     lemonSqueezyOrderId: v.optional(v.string()),
-  }).index("by_user_id", ["userId"]),
+    role: v.optional(v.union(v.literal("user"), v.literal("moderator"), v.literal("admin"))),
+  }).index("by_user_id", ["userId"])
+    .index("by_email", ["email"]),
 
-  codeExecutions: defineTable({
-    userId: v.string(),
-    language: v.string(),
-    code: v.string(),
-    output: v.optional(v.string()),
-    error: v.optional(v.string()),
-  }).index("by_user_id", ["userId"]),
-
+  // ========== SNIPPET TABLES ==========
   snippets: defineTable({
     userId: v.string(),
     title: v.string(),
@@ -46,7 +41,6 @@ export default defineSchema({
     .index("by_user_id_and_snippet_id", ["userId", "snippetId"]),
 
   // ========== CHALLENGE TABLES ==========
-
   challenges: defineTable({
     title: v.string(),
     slug: v.string(),
@@ -172,7 +166,8 @@ export default defineSchema({
     lastCode: v.optional(v.string()),
   })
     .index("by_user", ["userId"])
-    .index("by_user_challenge", ["userId", "challengeId"]),
+    .index("by_user_challenge", ["userId", "challengeId"])
+    .index("by_challenge", ["challengeId"]),
 
   challengeUserStats: defineTable({
     userId: v.string(),
@@ -189,7 +184,8 @@ export default defineSchema({
     lastSolvedDate: v.optional(v.string()),
     dsaSolved: v.number(),
     aimlSolved: v.number(),
-  }).index("by_user", ["userId"]),
+  }).index("by_user", ["userId"])
+    .index("by_points", ["points"]),
 
   // Admin roles for challenges
   challengeAdmins: defineTable({
@@ -257,5 +253,14 @@ export default defineSchema({
     reviewNote: v.optional(v.string()),
   })
     .index("by_status", ["status"])
-    .index("by_user", ["proposedBy"]),
+    .index("by_user", ["proposedBy"])
+    .index("by_slug", ["slug"]),
+
+  codeExecutions: defineTable({
+    userId: v.string(),
+    language: v.string(),
+    code: v.string(),
+    output: v.optional(v.string()),
+    error: v.optional(v.string()),
+  }).index("by_user_id", ["userId"]),
 });

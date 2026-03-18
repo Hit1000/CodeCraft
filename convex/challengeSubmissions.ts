@@ -63,6 +63,8 @@ export const submit = mutation({
         )
         .unique();
 
+      const isFirstSolve = !existing || existing.status !== "solved";
+
       if (existing) {
         const updates: Record<string, unknown> = {
           status: "solved" as const,
@@ -90,8 +92,10 @@ export const submit = mutation({
         });
       }
 
-      // Update user stats
-      await updateUserStats(ctx, args.userId, args.challengeId);
+      // Only recalculate stats on first solve, not on every resubmission
+      if (isFirstSolve) {
+        await updateUserStats(ctx, args.userId, args.challengeId);
+      }
     }
 
     return submissionId;
@@ -230,16 +234,19 @@ export const getRecentSubmissions = query({
       .order("desc")
       .take(20);
 
-    return Promise.all(
-      submissions.map(async (s) => {
-        const challenge = await ctx.db.get(s.challengeId);
-        return {
-          ...s,
-          challengeTitle: challenge?.title ?? "Unknown",
-          challengeSlug: challenge?.slug ?? "",
-          challengeDifficulty: challenge?.difficulty ?? "Easy",
-        };
-      })
-    );
+    // Deduplicate challenge lookups
+    const challengeIds = [...new Set(submissions.map((s) => s.challengeId))];
+    const challenges = await Promise.all(challengeIds.map((id) => ctx.db.get(id)));
+    const challengeMap = new Map(challenges.filter(Boolean).map((c) => [c!._id, c!]));
+
+    return submissions.map((s) => {
+      const challenge = challengeMap.get(s.challengeId);
+      return {
+        ...s,
+        challengeTitle: challenge?.title ?? "Unknown",
+        challengeSlug: challenge?.slug ?? "",
+        challengeDifficulty: challenge?.difficulty ?? "Easy",
+      };
+    });
   },
 });
