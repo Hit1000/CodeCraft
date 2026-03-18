@@ -1,4 +1,5 @@
 import HeaderProfileBtn from "@/app/(root)/_components/HeaderProfileBtn";
+import AdminNavLink from "@/components/AdminNavLink";
 import { SignedOut } from "@clerk/nextjs";
 import { Blocks, Code2, Lightbulb, Sparkles, Swords, Trophy } from "lucide-react";
 import Link from "next/link";
@@ -87,11 +88,11 @@ function NavigationHeader() {
             {/* Leaderboard Link */}
             <Link
               href="/leaderboard"
-              className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 hover:bg-amber-500/10 
+              className="relative group flex items-center gap-2 px-4 py-1.5 rounded-lg text-gray-300 bg-gray-800/50 hover:bg-amber-500/10
               border border-gray-800 hover:border-amber-500/50 transition-all duration-300 shadow-lg overflow-hidden"
             >
               <div
-                className="absolute inset-0 bg-gradient-to-r from-amber-500/10 
+                className="absolute inset-0 bg-gradient-to-r from-amber-500/10
               to-orange-500/10 opacity-0 group-hover:opacity-100 transition-opacity"
               />
               <Trophy className="w-4 h-4 relative z-10 group-hover:rotate-3 transition-transform" />
@@ -99,6 +100,9 @@ function NavigationHeader() {
                 Leaderboard
               </span>
             </Link>
+
+            {/* Admin Link (visible to admins/moderators only) */}
+            <AdminNavLink />
           </div>
 
           {/* right rection */}

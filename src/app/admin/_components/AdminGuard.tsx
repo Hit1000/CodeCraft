@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
-import { api } from "../../../../../convex/_generated/api";
+import { api } from "../../../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -9,31 +9,26 @@ import { Loader2 } from "lucide-react";
 
 interface AdminGuardProps {
   children: React.ReactNode;
-  onRole?: (role: string | null) => void;
 }
 
-export default function AdminGuard({ children, onRole }: AdminGuardProps) {
+export default function AdminGuard({ children }: AdminGuardProps) {
   const { user, isLoaded } = useUser();
   const router = useRouter();
 
-  const role = useQuery(
-    api.adminChallenges.getMyRole,
+  const userData = useQuery(
+    api.users.getUser,
     user?.id ? { userId: user.id } : "skip"
   );
 
   useEffect(() => {
-    if (role !== undefined) {
-      onRole?.(role);
+    if (isLoaded && userData !== undefined) {
+      if (!user || userData?.role !== "admin") {
+        router.replace("/challenges");
+      }
     }
-  }, [role, onRole]);
+  }, [isLoaded, user, userData, router]);
 
-  useEffect(() => {
-    if (isLoaded && (!user || role === null)) {
-      router.replace("/challenges");
-    }
-  }, [isLoaded, user, role, router]);
-
-  if (!isLoaded || role === undefined) {
+  if (!isLoaded || userData === undefined) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center">
         <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
@@ -41,7 +36,7 @@ export default function AdminGuard({ children, onRole }: AdminGuardProps) {
     );
   }
 
-  if (!user || role === null) {
+  if (!user || userData?.role !== "admin") {
     return null;
   }
 

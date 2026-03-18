@@ -1,4 +1,4 @@
-import { mutation, query } from "./_generated/server";
+import { mutation, query, QueryCtx, MutationCtx } from "./_generated/server";
 import { v } from "convex/values";
 
 // ===== Check if user is admin =====
@@ -11,6 +11,19 @@ export const isAdmin = query({
       .withIndex("by_user", (q) => q.eq("userId", args.userId))
       .unique();
     return !!admin;
+  },
+});
+
+// ===== Get just the role string for the current user =====
+export const getMyRole = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    if (!args.userId) return null;
+    const admin = await ctx.db
+      .query("challengeAdmins")
+      .withIndex("by_user", (q) => q.eq("userId", args.userId))
+      .unique();
+    return admin?.role ?? null;
   },
 });
 
@@ -43,7 +56,16 @@ export const bootstrapAdmin = mutation({
   },
 });
 
-// ===== Grant admin role (only existing admins can) =====
+// Helper: check if user is a true platform admin
+async function isTrueAdmin(ctx: QueryCtx | MutationCtx, userId: string): Promise<boolean> {
+  const user = await ctx.db
+    .query("users")
+    .withIndex("by_user_id", (q) => q.eq("userId", userId))
+    .first();
+  return user?.role === "admin";
+}
+
+// ===== Grant admin role (challenge admins or true platform admins can) =====
 export const grantAdmin = mutation({
   args: {
     granterId: v.string(),
@@ -51,12 +73,15 @@ export const grantAdmin = mutation({
     role: v.union(v.literal("admin"), v.literal("moderator")),
   },
   handler: async (ctx, args) => {
-    const granter = await ctx.db
+    // Allow if granter is a challenge admin with role "admin" OR a true platform admin
+    const granterChallengeAdmin = await ctx.db
       .query("challengeAdmins")
       .withIndex("by_user", (q) => q.eq("userId", args.granterId))
       .unique();
 
-    if (!granter || granter.role !== "admin") {
+    const isPlatformAdmin = await isTrueAdmin(ctx, args.granterId);
+
+    if (!isPlatformAdmin && (!granterChallengeAdmin || granterChallengeAdmin.role !== "admin")) {
       throw new Error("Only admins can grant roles");
     }
 
@@ -327,19 +352,21 @@ export const getFullChallenge = query({
   },
 });
 
-// ===== Revoke admin role =====
+// ===== Revoke admin role (challenge admins or true platform admins can) =====
 export const revokeAdmin = mutation({
   args: {
     granterId: v.string(),
     targetUserId: v.string(),
   },
   handler: async (ctx, args) => {
-    const granter = await ctx.db
+    const granterChallengeAdmin = await ctx.db
       .query("challengeAdmins")
       .withIndex("by_user", (q) => q.eq("userId", args.granterId))
       .unique();
 
-    if (!granter || granter.role !== "admin") {
+    const isPlatformAdmin = await isTrueAdmin(ctx, args.granterId);
+
+    if (!isPlatformAdmin && (!granterChallengeAdmin || granterChallengeAdmin.role !== "admin")) {
       throw new Error("Only admins can revoke roles");
     }
 

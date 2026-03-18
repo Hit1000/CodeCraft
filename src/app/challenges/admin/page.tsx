@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import AdminGuard from "./_components/AdminGuard";
 import ProposalReview from "./_components/ProposalReview";
-import UserManagement from "./_components/UserManagement";
 import NavigationHeader from "@/components/NavigationHeader";
 import {
   Plus,
@@ -20,10 +19,9 @@ import {
   Search,
   LayoutList,
   Lightbulb,
-  Users,
 } from "lucide-react";
 
-type Tab = "challenges" | "proposals" | "users";
+type Tab = "challenges" | "proposals";
 
 export default function AdminDashboard() {
   const { user } = useUser();
@@ -31,6 +29,7 @@ export default function AdminDashboard() {
   const [search, setSearch] = useState("");
   const [bootstrapping, setBootstrapping] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("challenges");
+  const [adminRole, setAdminRole] = useState<string | null>(null);
 
   const ensureUser = useMutation(api.users.ensureUser);
 
@@ -54,6 +53,13 @@ export default function AdminDashboard() {
     api.adminChallenges.isAdmin,
     user?.id ? { userId: user.id } : "skip"
   );
+
+  // If role becomes null (not an admin), redirect away
+  useEffect(() => {
+    if (adminRole === null && user?.id && isAdmin === false) {
+      router.replace("/challenges");
+    }
+  }, [adminRole, user?.id, isAdmin, router]);
 
   const pendingProposals = useQuery(
     api.challengeProposals.listPending,
@@ -112,14 +118,13 @@ export default function AdminDashboard() {
     );
   }
 
-  const tabs: { id: Tab; label: string; icon: React.ReactNode; badge?: number }[] = [
+  const allTabs: { id: Tab; label: string; icon: React.ReactNode; badge?: number }[] = [
     { id: "challenges", label: "Challenges", icon: <LayoutList className="w-4 h-4" /> },
     { id: "proposals", label: "Proposals", icon: <Lightbulb className="w-4 h-4" />, badge: pendingCount },
-    { id: "users", label: "Users", icon: <Users className="w-4 h-4" /> },
   ];
 
   return (
-    <AdminGuard>
+    <AdminGuard onRole={setAdminRole}>
       <div className="min-h-screen bg-gray-950">
         <NavigationHeader />
 
@@ -129,7 +134,7 @@ export default function AdminDashboard() {
             <div>
               <h1 className="text-2xl font-bold text-white">Challenge Admin</h1>
               <p className="text-sm text-gray-400 mt-1">
-                Manage challenges, review proposals, and configure users
+                Manage challenges and review proposals
               </p>
             </div>
             {activeTab === "challenges" && (
@@ -145,7 +150,7 @@ export default function AdminDashboard() {
 
           {/* Tabs */}
           <div className="flex gap-1 mb-6 bg-gray-900/40 rounded-xl p-1 w-fit">
-            {tabs.map((tab) => (
+            {allTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
@@ -248,13 +253,15 @@ export default function AdminDashboard() {
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
-                              <button
-                                onClick={() => handleDelete(challenge._id)}
-                                className="p-2 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-800/50"
-                                title="Delete"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              {adminRole === "admin" && (
+                                <button
+                                  onClick={() => handleDelete(challenge._id)}
+                                  className="p-2 text-gray-500 hover:text-red-400 transition-colors rounded-lg hover:bg-gray-800/50"
+                                  title="Delete"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              )}
                             </div>
                           </td>
                         </tr>
@@ -271,7 +278,6 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === "proposals" && <ProposalReview />}
-          {activeTab === "users" && <UserManagement />}
         </div>
       </div>
     </AdminGuard>

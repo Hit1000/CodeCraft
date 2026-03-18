@@ -20,7 +20,8 @@
       "Bash(git commit:*)",
       "Bash(git push:*)",
       "Bash(git checkout:*)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(find 'D:\\\\Web projects\\\\code-craft-ide\\\\src' -type f \\\\\\(-name *constant* -o -name *role* -o -name *admin* \\\\\\))"
     ]
   }
 }

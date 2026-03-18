@@ -2,19 +2,35 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  // ========== SESSION TABLES ==========
+  sessions: defineTable({
+    sessionToken: v.string(),
+    userId: v.string(),
+    createdAt: v.number(),
+    expiresAt: v.number(),
+  }).index("by_session_token", ["sessionToken"])
+    .index("by_user_id", ["userId"]),
+
   // ========== USER TABLES ==========
   users: defineTable({
     userId: v.string(), // clerkId
     email: v.string(),
     name: v.string(),
     isPro: v.boolean(),
-    isCheater: v.optional(v.boolean()),
     proSince: v.optional(v.number()),
     lemonSqueezyCustomerId: v.optional(v.string()),
     lemonSqueezyOrderId: v.optional(v.string()),
     role: v.optional(v.union(v.literal("user"), v.literal("moderator"), v.literal("admin"))),
   }).index("by_user_id", ["userId"])
     .index("by_email", ["email"]),
+
+  // ========== PLATFORM ADMIN TABLES ==========
+  platformAdmins: defineTable({
+    userId: v.string(),
+    role: v.union(v.literal("admin"), v.literal("moderator")),
+    grantedBy: v.string(),
+    grantedAt: v.number(),
+  }).index("by_user_id", ["userId"]),
 
   // ========== SNIPPET TABLES ==========
   snippets: defineTable({
@@ -107,6 +123,7 @@ export default defineSchema({
     createdBy: v.optional(v.string()),
     updatedBy: v.optional(v.string()),
     isPublished: v.optional(v.boolean()),
+    lastUpdated: v.optional(v.number()),
   })
     .index("by_slug", ["slug"])
     .index("by_category", ["category", "difficulty"])
