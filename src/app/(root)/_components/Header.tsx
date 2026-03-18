@@ -3,7 +3,7 @@ import { ConvexHttpClient } from "convex/browser";
 import { api } from "../../../../convex/_generated/api";
 import Link from "next/link";
 import { Blocks, Code2, LogIn, Sparkles, Swords } from "lucide-react";
-import { SignedIn, SignedOut, SignInButton } from "@clerk/nextjs";
+import { Show, SignInButton } from "@clerk/nextjs";
 import ThemeSelector from "./ThemeSelector";
 import LanguageSelector from "./LanguageSelector";
 import RunButton from "./RunButton";
@@ -111,22 +111,22 @@ async function Header() {
             </Link>
           )}
           
-          <SignedIn>
+          <Show when="signed-in">
             <AIChatButton />
             <RunButton />
             <div className="pl-3 border-l border-gray-800">
               <HeaderProfileBtn />
             </div>
-          </SignedIn>
+          </Show>
 
-          <SignedOut>
+          <Show when="signed-out">
             <SignInButton mode="modal">
               <button className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-medium transition-all duration-300 shadow-lg shadow-blue-500/25">
                 <LogIn className="w-4 h-4" />
                 <span>Sign In</span>
               </button>
             </SignInButton>
-          </SignedOut>
+          </Show>
         </div>
       </div>
     </div>

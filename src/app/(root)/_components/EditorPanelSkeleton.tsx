@@ -15,7 +15,7 @@ export function EditorPanelSkeleton() {
                 <div className={`w-12 h-4 bg-white/5 rounded`} />
                 <div
                   className={`h-4 bg-white/5 rounded`}
-                  style={{ width: `${Math.random() * 60 + 20}%` }}
+                  style={{ width: `${((i * 37 + 23) % 60) + 20}%` }}
                 />
               </div>
             ))}

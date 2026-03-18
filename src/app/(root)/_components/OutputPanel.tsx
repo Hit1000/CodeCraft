@@ -2,11 +2,13 @@
 
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { AlertTriangle, CheckCircle, Clock, Copy, Terminal } from "lucide-react";
-import { useState } from "react";
+import { useState, memo } from "react";
 import RunningCodeSkeleton from "./RunningCodeSkeleton";
 
 function OutputPanel() {
-  const { output, error, isRunning } = useCodeEditorStore();
+  const output = useCodeEditorStore((s) => s.output);
+  const error = useCodeEditorStore((s) => s.error);
+  const isRunning = useCodeEditorStore((s) => s.isRunning);
   const [isCopied, setIsCopied] = useState(false);
 
   const hasContent = error || output;
@@ -89,4 +91,4 @@ function OutputPanel() {
   );
 }
 
-export default OutputPanel;
+export default memo(OutputPanel);

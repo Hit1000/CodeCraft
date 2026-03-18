@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import DifficultyBadge from "./DifficultyBadge";
 import { CheckCircle2, Circle, Bookmark, ThumbsUp, BarChart3 } from "lucide-react";

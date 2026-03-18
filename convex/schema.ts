@@ -21,6 +21,7 @@ export default defineSchema({
     lemonSqueezyCustomerId: v.optional(v.string()),
     lemonSqueezyOrderId: v.optional(v.string()),
     role: v.optional(v.union(v.literal("user"), v.literal("moderator"), v.literal("admin"))),
+    isCheater: v.optional(v.boolean()),
   }).index("by_user_id", ["userId"])
     .index("by_email", ["email"]),
 

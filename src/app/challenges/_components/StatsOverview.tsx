@@ -1,5 +1,3 @@
-"use client";
-
 import { Trophy, Flame, Target, Award } from "lucide-react";
 
 interface StatsOverviewProps {

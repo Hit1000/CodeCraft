@@ -74,7 +74,7 @@ function SnippetDetailPage() {
             </div>
             <Editor
               height="600px"
-              language={LANGUAGE_CONFIG[snippet.language].monacoLanguage}
+              language={LANGUAGE_CONFIG[snippet.language]?.monacoLanguage ?? snippet.language}
               value={snippet.code}
               theme="vs-dark"
               beforeMount={defineMonacoThemes}

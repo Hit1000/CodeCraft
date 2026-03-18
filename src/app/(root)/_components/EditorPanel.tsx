@@ -1,15 +1,14 @@
 "use client";
 import { getExecutionResult, useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { defineMonacoThemes, LANGUAGE_CONFIG } from "../_constants";
-import { Editor } from "@monaco-editor/react";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { RotateCcwIcon, ShareIcon, TypeIcon } from "lucide-react";
 import { useClerk, useUser } from "@clerk/nextjs";
 import { EditorPanelSkeleton } from "./EditorPanelSkeleton";
 import useMounted from "@/hooks/useMounted";
-import ShareSnippetDialog from "./ShareSnippetDialog";
 import FileExplorer from "./FileExplorer";
 import TabsBar from "./TabsBar";
 import toast from "react-hot-toast";
@@ -17,6 +16,15 @@ import type * as monaco from "monaco-editor";
 import { useAIAutocomplete } from "./useAIAutocomplete";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+
+const Editor = dynamic(() => import("@monaco-editor/react").then((mod) => mod.Editor), {
+  ssr: false,
+  loading: () => <EditorPanelSkeleton />,
+});
+
+const ShareSnippetDialog = dynamic(() => import("./ShareSnippetDialog"), {
+  ssr: false,
+});
 
 function EditorPanel() {
   const clerk = useClerk();
@@ -53,7 +61,7 @@ function EditorPanel() {
   // Enable AI autocomplete
   useAIAutocomplete(editor);
 
-  const handleRefresh = () => {
+  const handleRefresh = useCallback(() => {
     if (!activeFileId) {
       toast.error("Create or open a file before resetting.");
       return;
@@ -66,35 +74,70 @@ function EditorPanel() {
     const defaultCode = LANGUAGE_CONFIG[fileLanguage].defaultCode;
     if (editor) editor.setValue(defaultCode);
     updateActiveFileContent(defaultCode);
-  };
+  }, [activeFileId, files, language, editor, updateActiveFileContent]);
 
-  const handleEditorChange = (value: string | undefined) => {
+  const handleEditorChange = useCallback((value: string | undefined) => {
     if (value !== undefined) {
       updateActiveFileContent(value);
     }
-  };
+  }, [updateActiveFileContent]);
 
-  const handleFontSizeChange = (newSize: number) => {
+  const handleFontSizeChange = useCallback((newSize: number) => {
     const size = Math.min(Math.max(newSize, 12), 24);
     setFontSize(size);
     localStorage.setItem("editor-font-size", size.toString());
-  };
+  }, [setFontSize]);
 
-  if (!mounted) return null;
+  const handleShareClick = useCallback(() => {
+    if (!activeFileId) {
+      toast.error("Create or open a file before sharing.");
+      return;
+    }
+    setIsShareDialogOpen(true);
+  }, [activeFileId]);
+
+  const editorOptions = useMemo(() => ({
+    minimap: { enabled: false },
+    fontSize,
+    automaticLayout: true,
+    scrollBeyondLastLine: false,
+    padding: { top: 16, bottom: 16 },
+    renderWhitespace: "selection" as const,
+    fontFamily: '"Fira Code", "Cascadia Code", Consolas, monospace',
+    fontLigatures: true,
+    cursorBlinking: "smooth" as const,
+    smoothScrolling: true,
+    contextmenu: true,
+    renderLineHighlight: "all" as const,
+    lineHeight: 1.6,
+    letterSpacing: 0.5,
+    roundedSelection: true,
+    scrollbar: {
+      verticalScrollbarSize: 8,
+      horizontalScrollbarSize: 8,
+    },
+    inlineSuggest: {
+      enabled: true,
+      showToolbar: "always" as const,
+      mode: "subwordSmart" as const,
+      suppressSuggestions: false,
+    },
+    quickSuggestions: {
+      other: "inline" as const,
+      comments: false,
+      strings: false,
+    },
+    suggest: {
+      preview: true,
+      showInlineDetails: true,
+    },
+  }), [fontSize]);
 
   const activeFile = activeFileId ? files[activeFileId] : null;
   const editorLanguage =
     activeFile && activeFile.type === "file"
       ? activeFile.language || language
       : language;
-
-  const handleShareClick = () => {
-    if (!activeFileId) {
-      toast.error("Create or open a file before sharing.");
-      return;
-    }
-    setIsShareDialogOpen(true);
-  };
 
   return (
     <div className="relative">
@@ -216,43 +259,7 @@ function EditorPanel() {
                     editorInstance.setValue(activeFile.content);
                   }
                 }}
-                options={{
-                  minimap: { enabled: false },
-                  fontSize,
-                  automaticLayout: true,
-                  scrollBeyondLastLine: false,
-                  padding: { top: 16, bottom: 16 },
-                  renderWhitespace: "selection",
-                  fontFamily: '"Fira Code", "Cascadia Code", Consolas, monospace',
-                  fontLigatures: true,
-                  cursorBlinking: "smooth",
-                  smoothScrolling: true,
-                  contextmenu: true,
-                  renderLineHighlight: "all",
-                  lineHeight: 1.6,
-                  letterSpacing: 0.5,
-                  roundedSelection: true,
-                  scrollbar: {
-                    verticalScrollbarSize: 8,
-                    horizontalScrollbarSize: 8,
-                  },
-                  // Enable inline suggestions for AI autocomplete
-                  inlineSuggest: {
-                    enabled: true,
-                    showToolbar: "always",
-                    mode: "subwordSmart",
-                    suppressSuggestions: false,
-                  },
-                  quickSuggestions: {
-                    other: "inline",
-                    comments: false,
-                    strings: false,
-                  },
-                  suggest: {
-                    preview: true,
-                    showInlineDetails: true,
-                  },
-                }}
+                options={editorOptions}
               />
             )}
 

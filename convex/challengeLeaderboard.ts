@@ -13,19 +13,27 @@ export const getLeaderboard = query({
       .order("desc")
       .take(limit);
 
-    return sorted.map((s, i) => ({
-      rank: i + 1,
-      userId: s.userId,
-      totalSolved: s.totalSolved,
-      easySolved: s.easySolved,
-      mediumSolved: s.mediumSolved,
-      hardSolved: s.hardSolved,
-      points: s.points,
-      currentStreak: s.currentStreak,
-      maxStreak: s.maxStreak,
-      dsaSolved: s.dsaSolved,
-      aimlSolved: s.aimlSolved,
-    }));
+    const users = await ctx.db.query("users").collect();
+    const userMap = new Map(users.map((u) => [u.userId, u]));
+
+    return sorted.map((s, i) => {
+      const user = userMap.get(s.userId);
+      return {
+        rank: i + 1,
+        userId: s.userId,
+        userName: user?.name ?? user?.email ?? "Unknown",
+        userEmail: user?.email,
+        totalSolved: s.totalSolved,
+        easySolved: s.easySolved,
+        mediumSolved: s.mediumSolved,
+        hardSolved: s.hardSolved,
+        points: s.points,
+        currentStreak: s.currentStreak,
+        maxStreak: s.maxStreak,
+        dsaSolved: s.dsaSolved,
+        aimlSolved: s.aimlSolved,
+      };
+    });
   },
 });
 

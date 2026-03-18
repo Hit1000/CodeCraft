@@ -1,5 +1,3 @@
-"use client";
-
 interface DifficultyBadgeProps {
   difficulty: "Easy" | "Medium" | "Hard";
   size?: "sm" | "md";

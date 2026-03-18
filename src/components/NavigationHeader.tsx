@@ -1,6 +1,6 @@
 import HeaderProfileBtn from "@/app/(root)/_components/HeaderProfileBtn";
 import AdminNavLink from "@/components/AdminNavLink";
-import { SignedOut } from "@clerk/nextjs";
+import { Show } from "@clerk/nextjs";
 import { Blocks, Code2, Lightbulb, Sparkles, Swords, Trophy } from "lucide-react";
 import Link from "next/link";
 
@@ -107,12 +107,12 @@ function NavigationHeader() {
 
           {/* right rection */}
           <div className="flex items-center gap-4">
-            <SignedOut>
+            <Show when="signed-out">
               <Link
                 href="/pricing"
                 className="flex items-center gap-2 px-4 py-1.5 rounded-lg border border-amber-500/20
-                 hover:border-amber-500/40 bg-gradient-to-r from-amber-500/10 
-                to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 transition-all 
+                 hover:border-amber-500/40 bg-gradient-to-r from-amber-500/10
+                to-orange-500/10 hover:from-amber-500/20 hover:to-orange-500/20 transition-all
                 duration-300"
               >
                 <Sparkles className="w-4 h-4 text-amber-400 hover:text-amber-300" />
@@ -120,7 +120,7 @@ function NavigationHeader() {
                   Pro
                 </span>
               </Link>
-            </SignedOut>
+            </Show>
 
             {/* profile button */}
             <HeaderProfileBtn />

@@ -1,7 +1,7 @@
 "use client";
 import { AIMessage } from "@/lib/ai/types";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, memo } from "react";
 import ReactMarkdown from "react-markdown";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
@@ -11,7 +11,7 @@ interface ChatMessageProps {
   message: AIMessage;
 }
 
-export default function ChatMessage({ message }: ChatMessageProps) {
+function ChatMessage({ message }: ChatMessageProps) {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = (code: string) => {
@@ -116,3 +116,5 @@ export default function ChatMessage({ message }: ChatMessageProps) {
     </div>
   );
 }
+
+export default memo(ChatMessage);

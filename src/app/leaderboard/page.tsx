@@ -55,7 +55,14 @@ export default function LeaderboardPage() {
             </thead>
             <tbody>
               {leaderboard?.map((entry, i) => {
-                const rc = rankConfig[entry.title] ?? rankConfig["Beginner"];
+                const rankTitle =
+                  entry.points >= 5000 ? "Grandmaster" :
+                  entry.points >= 2500 ? "Master" :
+                  entry.points >= 1500 ? "Expert" :
+                  entry.points >= 800 ? "Advanced" :
+                  entry.points >= 300 ? "Intermediate" :
+                  "Beginner";
+                const rc = rankConfig[rankTitle] ?? rankConfig["Beginner"];
                 return (
                   <tr
                     key={entry.userId}
@@ -81,12 +88,19 @@ export default function LeaderboardPage() {
                       <div className="flex items-center gap-3">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500/30 to-purple-500/30 border border-gray-700/50 flex items-center justify-center">
                           <span className="text-xs font-bold text-blue-400">
-                            {entry.userId.substring(0, 2).toUpperCase()}
+                            {entry.userName.substring(0, 2).toUpperCase()}
                           </span>
                         </div>
-                        <span className="text-sm font-medium text-gray-300">
-                          {entry.userId.substring(0, 12)}...
-                        </span>
+                        <div>
+                          <div className="text-sm font-medium text-gray-300">
+                            {entry.userName}
+                          </div>
+                          {entry.userEmail && (
+                            <div className="text-xs text-gray-500">
+                              {entry.userEmail}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </td>
 
@@ -126,7 +140,7 @@ export default function LeaderboardPage() {
                     <td className="px-5 py-3.5 text-center">
                       <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${rc.color} ${rc.bg} border border-current/20`}>
                         {rc.icon}
-                        {entry.title}
+                        {rankTitle}
                       </span>
                     </td>
                   </tr>

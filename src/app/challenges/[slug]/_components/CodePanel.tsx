@@ -1,9 +1,18 @@
 "use client";
 
 import { useChallengeStore } from "@/store/useChallengeStore";
-import Editor from "@monaco-editor/react";
+import dynamic from "next/dynamic";
 import { Play, Send, RotateCcw, ChevronDown } from "lucide-react";
 import { useState, useRef } from "react";
+
+const Editor = dynamic(() => import("@monaco-editor/react").then((mod) => mod.Editor), {
+  ssr: false,
+  loading: () => (
+    <div className="h-full flex items-center justify-center bg-[#1e1e2e]/50">
+      <div className="text-gray-500 text-sm">Loading editor...</div>
+    </div>
+  ),
+});
 
 interface CodePanelProps {
   starterCode: {
@@ -26,6 +35,22 @@ const languageOptions = [
   { id: "java", label: "Java", monacoId: "java" },
   { id: "cpp", label: "C++", monacoId: "cpp" },
 ];
+
+const MONACO_OPTIONS = {
+  fontSize: 14,
+  fontFamily: "var(--font-geist-mono), 'Fira Code', monospace",
+  minimap: { enabled: false },
+  scrollBeyondLastLine: false,
+  padding: { top: 16, bottom: 16 },
+  lineNumbersMinChars: 3,
+  renderLineHighlight: "line" as const,
+  cursorBlinking: "smooth" as const,
+  smoothScrolling: true,
+  contextmenu: true,
+  automaticLayout: true,
+  tabSize: 2,
+  wordWrap: "on" as const,
+};
 
 export default function CodePanel({ starterCode, onRun, onSubmit, isRunning, isSubmitting }: CodePanelProps) {
   const { activeLanguage, setActiveLanguage, code, setCode } = useChallengeStore();
@@ -136,21 +161,7 @@ export default function CodePanel({ starterCode, onRun, onSubmit, isRunning, isS
           onChange={(val) => setCode(val ?? "")}
           onMount={handleEditorMount}
           theme="vs-dark"
-          options={{
-            fontSize: 14,
-            fontFamily: "var(--font-geist-mono), 'Fira Code', monospace",
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            padding: { top: 16, bottom: 16 },
-            lineNumbersMinChars: 3,
-            renderLineHighlight: "line",
-            cursorBlinking: "smooth",
-            smoothScrolling: true,
-            contextmenu: true,
-            automaticLayout: true,
-            tabSize: 2,
-            wordWrap: "on",
-          }}
+          options={MONACO_OPTIONS}
         />
       </div>
     </div>

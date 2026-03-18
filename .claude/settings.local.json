@@ -21,7 +21,13 @@
       "Bash(git push:*)",
       "Bash(git checkout:*)",
       "Bash(git pull:*)",
-      "Bash(find 'D:\\\\Web projects\\\\code-craft-ide\\\\src' -type f \\\\\\(-name *constant* -o -name *role* -o -name *admin* \\\\\\))"
+      "Bash(find 'D:\\\\Web projects\\\\code-craft-ide\\\\src' -type f \\\\\\(-name *constant* -o -name *role* -o -name *admin* \\\\\\))",
+      "Bash(rm -rf /testbed/src/components/demos/sidebar-07)",
+      "Bash(mkdir -p /testbed/src/components/demos/sidebar-07/components)",
+      "Bash(npm ls:*)",
+      "Bash(npm view:*)",
+      "Bash(npm outdated:*)",
+      "Bash(npm install:*)"
     ]
   }
 }
