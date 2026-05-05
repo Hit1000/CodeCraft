@@ -44,3 +44,5 @@ data/
 
 # screen shots
 ss/
+# clerk configuration (can include secrets)
+/.clerk/

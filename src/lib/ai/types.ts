@@ -28,19 +28,20 @@ export interface ChatActionType {
     prompt?: string;
 }
 
-export interface OllamaResponse {
-    model: string;
-    created_at: string;
-    response: string;
-    done: boolean;
+export interface OpenRouterMessage {
+    role: "system" | "user" | "assistant";
+    content: string;
 }
 
-export interface OllamaGenerateRequest {
-    model: string;
-    prompt: string;
-    stream?: boolean;
-    options?: {
-        temperature?: number;
-        num_predict?: number;
-    };
+export interface OpenRouterResponse {
+    id: string;
+    choices: Array<{
+        message: {
+            role: string;
+            content: string;
+        };
+        delta?: {
+            content: string;
+        };
+    }>;
 }

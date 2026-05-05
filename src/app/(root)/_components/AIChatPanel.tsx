@@ -1,6 +1,6 @@
 "use client";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { getOllamaService } from "@/lib/ai/ollama-service";
+import { getOpenRouterService } from "@/lib/ai/openrouter-service";
 import { AIMessage } from "@/lib/ai/types";
 import { XIcon, SendIcon, SparklesIcon, WrenchIcon, ZapIcon, Loader2Icon } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -24,15 +24,14 @@ export default function AIChatPanel() {
   const [inputValue, setInputValue] = useState("");
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const ollamaService = getOllamaService();
+  const openRouterService = getOpenRouterService();
 
-  // Check Ollama connection on mount
   useEffect(() => {
     const checkConnection = async () => {
-      const connected = await ollamaService.checkConnection();
+      const connected = await openRouterService.checkConnection();
       setIsConnected(connected);
       if (!connected) {
-        toast.error("Ollama is not running. Please start Ollama service.");
+        toast.error("OpenRouter is not configured. Please add OPENROUTER_API_KEY to .env.local");
       }
     };
     checkConnection();
@@ -82,7 +81,7 @@ export default function AIChatPanel() {
       addChatMessage(placeholderMessage);
 
       // Stream response
-      for await (const chunk of ollamaService.chat(messages)) {
+      for await (const chunk of openRouterService.chat(messages)) {
         aiResponse += chunk;
 
         // Update the message with streamed content
@@ -103,7 +102,7 @@ export default function AIChatPanel() {
       }
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Failed to get AI response. Is Ollama running?");
+      toast.error("Failed to get AI response. Check OpenRouter API key.");
     } finally {
       setAIThinking(false);
     }

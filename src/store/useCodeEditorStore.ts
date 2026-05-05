@@ -81,8 +81,8 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
     isAIThinking: false,
     selectedCode: "",
     aiConfig: {
-      endpoint: process.env.NEXT_PUBLIC_OLLAMA_ENDPOINT || "http://localhost:11434",
-      model: process.env.NEXT_PUBLIC_AI_MODEL || "qwen3:4b",
+      endpoint: "/api/openrouter",
+      model: process.env.NEXT_PUBLIC_OPENROUTER_MODEL || "openrouter/free",
       temperature: 0.7,
       maxTokens: 2000,
       stream: true,
@@ -568,3 +568,6 @@ export const useCodeEditorStore = create<CodeEditorState>((set, get) => {
 });
 
 export const getExecutionResult = () => useCodeEditorStore.getState().executionResult;
+
+// Re-export for components
+export { getOpenRouterService } from "@/lib/ai/openrouter-service";

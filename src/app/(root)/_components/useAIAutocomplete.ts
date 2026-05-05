@@ -1,12 +1,12 @@
 "use client";
 import { useCodeEditorStore } from "@/store/useCodeEditorStore";
-import { getOllamaService } from "@/lib/ai/ollama-service";
+import { getOpenRouterService } from "@/lib/ai/openrouter-service";
 import { useEffect } from "react";
 import type * as monaco from "monaco-editor";
 
 export function useAIAutocomplete(editor: monaco.editor.IStandaloneCodeEditor | null) {
     const { isAutocompleteEnabled, autocompleteDelay, language } = useCodeEditorStore();
-    const ollamaService = getOllamaService();
+    const openRouterService = getOpenRouterService();
 
     useEffect(() => {
         if (!editor || !isAutocompleteEnabled) return;
@@ -14,7 +14,7 @@ export function useAIAutocomplete(editor: monaco.editor.IStandaloneCodeEditor | 
         let timeoutId: NodeJS.Timeout;
         let isProcessing = false;
 
-        const provider: any = {
+        const provider = {
             provideInlineCompletions: async (model: any, position: any, context: any, token: any) => {
                 console.log("[AI Autocomplete] provideInlineCompletions called!");
 
@@ -49,44 +49,44 @@ export function useAIAutocomplete(editor: monaco.editor.IStandaloneCodeEditor | 
                             if (currentChar && /\w/.test(currentChar)) {
                                 resolve({ items: [] });
                                 isProcessing = false;
-                                return;
-                            }
+                            } else {
+                                console.log("[AI Autocomplete] Requesting completion from OpenRouter...");
+                                const completion = await openRouterService.getCompletion({
+                                    code: textBeforeCursor + textAfterCursor,
+                                    language,
+                                    cursorPosition: textBeforeCursor.length,
+                                    contextBefore: textBeforeCursor,
+                                    contextAfter: textAfterCursor,
+                                });
 
-                            console.log("[AI Autocomplete] Requesting completion from Ollama...");
-                            const completion = await ollamaService.getCompletion({
-                                code: textBeforeCursor + textAfterCursor,
-                                language,
-                                cursorPosition: textBeforeCursor.length,
-                                contextBefore: textBeforeCursor,
-                                contextAfter: textAfterCursor,
-                            });
+                                console.log("[AI Autocomplete] Got completion:", completion);
 
-                            console.log("[AI Autocomplete] Got completion:", completion);
+                                if (completion && !token.isCancellationRequested) {
+                                    const cleanedCompletion = completion.trim().split("\n")[0];
 
-                            if (completion && !token.isCancellationRequested) {
-                                const cleanedCompletion = completion.trim().split("\n")[0];
-
-                                if (cleanedCompletion) {
-                                    console.log("[AI Autocomplete] Providing suggestion:", cleanedCompletion);
-                                    resolve({
-                                        items: [
-                                            {
-                                                insertText: cleanedCompletion,
-                                                range: {
-                                                    startLineNumber: position.lineNumber,
-                                                    startColumn: position.column,
-                                                    endLineNumber: position.lineNumber,
-                                                    endColumn: position.column,
+                                    if (cleanedCompletion) {
+                                        console.log("[AI Autocomplete] Providing suggestion:", cleanedCompletion);
+                                        resolve({
+                                            items: [
+                                                {
+                                                    insertText: cleanedCompletion,
+                                                    range: {
+                                                        startLineNumber: position.lineNumber,
+                                                        startColumn: position.column,
+                                                        endLineNumber: position.lineNumber,
+                                                        endColumn: position.column,
+                                                    },
                                                 },
-                                            },
-                                        ],
-                                    });
-                                    isProcessing = false;
-                                    return;
+                                            ],
+                                        });
+                                        isProcessing = false;
+                                    } else {
+                                        resolve({ items: [] });
+                                    }
+                                } else {
+                                    resolve({ items: [] });
                                 }
                             }
-
-                            resolve({ items: [] });
                         } catch (error) {
                             console.error("[AI Autocomplete] Error:", error);
                             resolve({ items: [] });
@@ -125,5 +125,5 @@ export function useAIAutocomplete(editor: monaco.editor.IStandaloneCodeEditor | 
             clearTimeout(timeoutId);
             disposable.dispose();
         };
-    }, [editor, isAutocompleteEnabled, autocompleteDelay, language, ollamaService]);
+    }, [editor, isAutocompleteEnabled, autocompleteDelay, language, openRouterService]);
 }
