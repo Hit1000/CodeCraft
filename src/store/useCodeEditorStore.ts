@@ -18,10 +18,14 @@ const persistFilesState = (
   openFileIds: string[]
 ) => {
   if (typeof window === "undefined") return;
-  localStorage.setItem(
-    FILE_STORAGE_KEY,
-    JSON.stringify({ files, activeFileId, openFileIds })
-  );
+  try {
+    localStorage.setItem(
+      FILE_STORAGE_KEY,
+      JSON.stringify({ files, activeFileId, openFileIds })
+    );
+  } catch (e) {
+    // localStorage not available
+  }
 };
 
 const normalizeFiles = (files: Record<string, FileNode>, fallbackLanguage: string) => {
@@ -40,24 +44,10 @@ const normalizeFiles = (files: Record<string, FileNode>, fallbackLanguage: strin
 };
 
 const getInitialState = () => {
-  // if we're on the server, return default values
-  if (typeof window === "undefined") {
-    return {
-      language: "javascript",
-      fontSize: 16,
-      theme: "vs-dark",
-    };
-  }
-
-  // if we're on the client, return values from local storage bc localStorage is a browser API.
-  const savedLanguage = localStorage.getItem("editor-language") || "javascript";
-  const savedTheme = localStorage.getItem("editor-theme") || "vs-dark";
-  const savedFontSize = localStorage.getItem("editor-font-size") || 16;
-
   return {
-    language: savedLanguage,
-    theme: savedTheme,
-    fontSize: Number(savedFontSize),
+    language: "javascript",
+    fontSize: 16,
+    theme: "vs-dark",
   };
 };
 
