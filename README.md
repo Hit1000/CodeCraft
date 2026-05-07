@@ -1,15 +1,15 @@
 # ✨ CodeCraft - SaaS Code Editor ✨
 <img src="./public/home0.png" alt=" " align="center" />
-CodeCraft is a modern, in-browser IDE built with Next.js 15, offering a seamless coding experience with powerful AI capabilities, real-time collaboration features, and a robust backend powered by Convex.
+CodeCraft is a modern, in-browser IDE built with Next.js 16, offering a seamless coding experience with powerful AI capabilities, real-time collaboration features, and a robust backend powered by Convex.
 
 ## Key Features
 
 - **Advanced Code Editor**: Utilizes Monaco Editor, the engine behind VS Code, for a familiar and powerful editing experience with support for 5 themes and customizable font sizes.
-- **Multi-Language Support**: Write and execute code in 9 different languages, including JavaScript, TypeScript, Python, Java, Go, Rust, C++, Ruby, and Swift.
+- **Multi-Language Support**: Write and execute code in 8 different languages, including JavaScript, TypeScript, Python, Java, Rust, C++, Ruby, and Swift.
 - **AI-Powered Assistant**:
   - **AI Chat**: An integrated chat panel to ask questions about your code.
   - **Quick Actions**: Instantly explain, fix, or optimize selected code.
-  - **AI Autocomplete**: Intelligent, inline code suggestions powered by Ollama.
+  - **AI Autocomplete**: Intelligent, inline code suggestions powered by OpenRouter.
 - **Coding Challenges (DSA & AI/ML)**: Practice curated Data Structures & Algorithms and AI/ML-focused problems with hidden/visible test cases, difficulty and topic filters, progress tracking, and a competitive leaderboard.
 - **Virtual File System**: Manage your project with a built-in file explorer that supports files and folders, with state persisted in local storage.
 - **Code Snippet Sharing**: Share your code with the community by creating snippets. Others can view, comment on, and star your work.
@@ -19,10 +19,10 @@ CodeCraft is a modern, in-browser IDE built with Next.js 15, offering a seamless
 
 ## Tech Stack
 
-- **Framework**: Next.js 15 (React 19)
+- **Framework**: Next.js 16 (React 19)
 - **Backend & Database**: Convex
 - **Authentication**: Clerk
-- **AI Integration**: Ollama
+- **AI Integration**: OpenRouter
 - **Code Execution**: Piston (self-hosted via Docker)
 - **UI**: Tailwind CSS & Framer Motion
 - **Code Editor**: Monaco Editor
@@ -35,7 +35,7 @@ Before you begin, make sure you have the following installed:
 
 - [Node.js](https://nodejs.org/) (v18 or higher)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for code execution)
-- [Ollama](https://ollama.com/) (for AI features — optional)
+- An account on [OpenRouter](https://openrouter.ai) (for AI features — optional)
 - Accounts on [Convex](https://convex.dev) and [Clerk](https://clerk.com)
 
 ---
@@ -70,9 +70,9 @@ NEXT_PUBLIC_CONVEX_URL=
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
 
-# Ollama AI Configuration (run Ollama locally)
-NEXT_PUBLIC_OLLAMA_ENDPOINT=http://localhost:11434
-NEXT_PUBLIC_AI_MODEL=deepseek-coder:1.3b
+# OpenRouter AI Configuration (get API key from openrouter.ai)
+NEXT_PUBLIC_OPENROUTER_MODEL=openrouter/free
+OPENROUTER_API_KEY=
 
 # Piston Code Execution (set after completing Step 4 below)
 NEXT_PUBLIC_PISTON_API_URL=http://localhost:2000/api/v2/execute
@@ -113,6 +113,8 @@ curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application
 curl -X POST http://localhost:2000/api/v2/packages -H "Content-Type: application/json" -d "{\"language\": \"swift\", \"version\": \"*\"}"
 ```
 
+> **Windows users:** A convenience script `install-piston-runtimes.bat` is included in the project root to install all runtimes at once.
+
 #### 4c. Verify installed runtimes
 
 ```bash
@@ -128,18 +130,11 @@ curl -X POST http://localhost:2000/api/v2/execute -H "Content-Type: application/
 # Expected: {"run":{"stdout":"hello\n",...}}
 ```
 
-### 5. Set Up Ollama (AI Features — Optional)
+### 5. Set Up OpenRouter (AI Features — Optional)
 
-Install [Ollama](https://ollama.com/) and pull a model:
-
-```bash
-ollama pull deepseek-coder:1.3b
-```
-
-Then start Ollama:
-```bash
-ollama serve
-```
+1. Create an account at [OpenRouter](https://openrouter.ai) and get your API key.
+2. Add the API key to your `.env.local` file as `OPENROUTER_API_KEY`.
+3. Set `NEXT_PUBLIC_OPENROUTER_MODEL` to your preferred model (e.g., `openrouter/free`).
 
 ### 6. Run the Development Servers
 
@@ -183,13 +178,18 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 - `src/app/`: The main application code, following the Next.js App Router structure.
   - `(root)/`: The primary editor interface.
   - `api/execute/`: Server-side proxy route that forwards code to the local Piston instance (avoids CORS).
+  - `api/openrouter/`: Server-side proxy route that forwards AI requests to the OpenRouter API.
   - `challenges/`: Coding challenge pages with DSA & AI/ML problems, tagged by category/difficulty, with test case execution, progress tracking, and editorial/leaderboard views.
+  - `challenges/admin/`: Challenge admin panel for managing problems, reviewing proposals, and user management.
+  - `challenges/propose/`: Community challenge proposal page.
+  - `leaderboard/`: Competitive leaderboard ranking users by challenge performance.
+  - `admin/`: Platform admin panel for user management and site administration.
   - `profile/`: User profile page with stats and execution history.
   - `snippets/`: Pages for browsing, viewing, and commenting on shared code snippets.
   - `pricing/`: The pricing page for the Pro plan.
 - `src/components/`: Shared React components used across the application.
-- `src/store/`: Zustand store (`useCodeEditorStore`) for global state management of the editor, file system, and AI features.
-- `src/lib/ai/`: Contains the `OllamaService` for handling communication with the local Ollama AI model.
+- `src/store/`: Zustand stores — `useCodeEditorStore` for editor/file system/AI state, and `useChallengeStore` for challenge filters and problem-solving state.
+- `src/lib/ai/`: Contains the `OpenRouterService` for handling communication with the OpenRouter AI API.
 - `docker-compose.piston.yml`: Docker Compose config for the Piston code execution engine.
 
 ## Coding Challenges (DSA & AI/ML)
