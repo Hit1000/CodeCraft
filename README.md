@@ -148,6 +148,7 @@ npm run dev
 **Terminal 2 — Convex backend:**
 ```bash
 npx convex dev
+npx convex run seed/seedChallenges:seedChallenges
 ```
 
 **Terminal 3 — Piston (if not already running):**

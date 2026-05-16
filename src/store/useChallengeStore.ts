@@ -19,6 +19,13 @@ interface TestResult {
   isHidden: boolean;
 }
 
+interface ChallengeContext {
+  title: string;
+  description: string;
+  examples: Array<{ input: string; output: string; explanation?: string }>;
+  constraints: string[];
+}
+
 interface ChallengeState {
   // Filters
   filters: ChallengeFilters;
@@ -34,6 +41,10 @@ interface ChallengeState {
   setActiveLanguage: (lang: string) => void;
   code: string;
   setCode: (code: string) => void;
+
+  // Current challenge context (for AI prompts)
+  challengeContext: ChallengeContext | null;
+  setChallengeContext: (context: ChallengeContext | null) => void;
 
   // Active tab in problem page
   activeTab: "description" | "editorial" | "submissions";
@@ -84,6 +95,10 @@ export const useChallengeStore = create<ChallengeState>((set) => ({
   setActiveLanguage: (lang) => set({ activeLanguage: lang }),
   code: "",
   setCode: (code) => set({ code }),
+
+  // Challenge context
+  challengeContext: null,
+  setChallengeContext: (context) => set({ challengeContext: context }),
 
   // Active tab
   activeTab: "description",

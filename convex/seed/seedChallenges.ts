@@ -46,7 +46,7 @@ export const seedChallenges = internalMutation({
           { id: "tc1", input: "[2,7,11,15], 9", expectedOutput: "[0,1]", isHidden: false },
           { id: "tc2", input: "[3,2,4], 6", expectedOutput: "[1,2]", isHidden: false },
           { id: "tc3", input: "[3,3], 6", expectedOutput: "[0,1]", isHidden: false },
-          { id: "tc4", input: "[1,5,3,7,2,8], 10", expectedOutput: "[1,3]", isHidden: true },
+          { id: "tc4", input: "[1,5,3,7,2,8], 10", expectedOutput: "[2,3]", isHidden: true },
           { id: "tc5", input: "[-1,-2,-3,-4,-5], -8", expectedOutput: "[2,4]", isHidden: true },
         ],
         hints: [
@@ -93,11 +93,11 @@ export const seedChallenges = internalMutation({
           javascript: `const _result = solution({{TEST_INPUT}});\nconst _expected = {{EXPECTED_OUTPUT}};\nif (String(_result) === String(_expected)) {\n    console.log("PASS:{{TEST_ID}}:0");\n} else {\n    console.log("FAIL:{{TEST_ID}}:expected=" + _expected + ":actual=" + _result + ":0");\n}`,
         },
         testCases: [
-          { id: "tc1", input: '"()"', expectedOutput: "true", isHidden: false },
-          { id: "tc2", input: '"()[]{}"', expectedOutput: "true", isHidden: false },
-          { id: "tc3", input: '"(]"', expectedOutput: "false", isHidden: false },
-          { id: "tc4", input: '"([{}])"', expectedOutput: "true", isHidden: true },
-          { id: "tc5", input: '""', expectedOutput: "true", isHidden: true },
+          { id: "tc1", input: '"()"', expectedOutput: "True", isHidden: false },
+          { id: "tc2", input: '"()[]{}"', expectedOutput: "True", isHidden: false },
+          { id: "tc3", input: '"(]"', expectedOutput: "False", isHidden: false },
+          { id: "tc4", input: '"([{}])"', expectedOutput: "True", isHidden: true },
+          { id: "tc5", input: '""', expectedOutput: "True", isHidden: true },
         ],
         hints: [
           "Use a stack to keep track of opening brackets.",

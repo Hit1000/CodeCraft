@@ -71,6 +71,7 @@ export default function ChallengeSolvePage() {
     setActiveTab,
     setCode,
     setActiveLanguage,
+    setChallengeContext,
     code,
     activeLanguage,
     testResults,
@@ -118,6 +119,17 @@ export default function ChallengeSolvePage() {
     totalTestCases: number;
     errorMessage?: string;
   } | null>(null);
+
+  // Store challenge context for AI prompts
+  useEffect(() => {
+    if (!challenge) return;
+    setChallengeContext({
+      title: challenge.title,
+      description: challenge.description,
+      examples: challenge.examples ?? [],
+      constraints: challenge.constraints ?? [],
+    });
+  }, [challenge?._id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Initialize code from local storage, saved progress, or starter code
   useEffect(() => {

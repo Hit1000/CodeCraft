@@ -13,6 +13,8 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
 import remarkGfm from "remark-gfm";
 import toast from "react-hot-toast";
+import { usePathname } from "next/navigation";
+import { useChallengeStore } from "@/store/useChallengeStore";
 
 interface ChatSession {
   id: string;
@@ -250,6 +252,15 @@ export default function AIChatPanel() {
     updateActiveFileContent,
   } = useCodeEditorStore();
 
+  const pathname = usePathname();
+  const isChallengeRoute = pathname?.startsWith("/challenges/") ?? false;
+  const {
+    code: challengeCode,
+    activeLanguage: challengeLanguage,
+    setCode: setChallengeCode,
+    challengeContext,
+  } = useChallengeStore();
+
   const [inputValue, setInputValue] = useState("");
   const [isConnected, setIsConnected] = useState<boolean | null>(null);
   const [isStreaming, setIsStreaming] = useState(false);
@@ -265,6 +276,77 @@ const messagesEndRef = useRef<HTMLDivElement>(null);
   const aiMessageIdRef = useRef<string | null>(null);
   const openRouterService = getOpenRouterService();
   const prevMessagesLengthRef = useRef(0);
+
+  const formatAIError = (error: unknown) => {
+    if (error instanceof Error) {
+      const message = error.message || "AI request failed.";
+      const apiMatch = message.match(/API error\s*(\d+):\s*(.*)$/i);
+      if (apiMatch) {
+        const status = apiMatch[1];
+        try {
+          const parsed = JSON.parse(apiMatch[2]);
+          if (parsed?.details) {
+            try {
+              const inner = JSON.parse(parsed.details);
+              const raw = inner?.error?.metadata?.raw;
+              if (raw) {
+                return `AI error ${status}: ${raw}`;
+              }
+            } catch {
+              // fall through
+            }
+          }
+          if (parsed?.error) {
+            return `AI error ${status}: ${parsed.error}`;
+          }
+        } catch {
+          // fall through
+        }
+        if (status === "429") {
+          return "AI is temporarily rate-limited. Please retry in a minute or add your own OpenRouter key.";
+        }
+      }
+
+      if (/rate[-\s]?limit/i.test(message)) {
+        return "AI is temporarily rate-limited. Please retry shortly.";
+      }
+
+      return `AI error: ${message}`;
+    }
+
+    return "AI error: request failed. Please try again.";
+  };
+
+  const upsertAssistantMessage = useCallback((message: AIMessage) => {
+    if (currentSessionId && chatSessions.some((s) => s.id === currentSessionId)) {
+      setChatSessions((prev) =>
+        prev.map((s) => {
+          if (s.id !== currentSessionId) return s;
+          const idx = s.messages.findIndex((m) => m.id === message.id);
+          if (idx === -1) {
+            return { ...s, messages: [...s.messages, message] };
+          }
+          const nextMessages = [...s.messages];
+          nextMessages[idx] = message;
+          return { ...s, messages: nextMessages };
+        })
+      );
+      return;
+    }
+
+    const currentChatMessages = useCodeEditorStore.getState().chatMessages;
+    const idx = currentChatMessages.findIndex((m) => m.id === message.id);
+    if (idx === -1) {
+      useCodeEditorStore.setState({
+        chatMessages: [...currentChatMessages, message],
+      });
+      return;
+    }
+
+    const nextMessages = [...currentChatMessages];
+    nextMessages[idx] = message;
+    useCodeEditorStore.setState({ chatMessages: nextMessages });
+  }, [chatSessions, currentSessionId, setChatSessions]);
 
   useEffect(() => {
     let mounted = true;
@@ -426,7 +508,15 @@ const messagesEndRef = useRef<HTMLDivElement>(null);
 
      } catch (error) {
        console.error("Chat error:", error);
-       toast.error("AI error. Check API key.");
+       const errorText = formatAIError(error);
+       const errorMessage: AIMessage = {
+         id: aiMessageIdRef.current ?? `${Date.now()}-ai-error`,
+         role: "assistant",
+         content: errorText,
+         timestamp: Date.now(),
+       };
+       upsertAssistantMessage(errorMessage);
+       toast.error(errorText);
      } finally {
        setAIThinking(false);
        setIsStreaming(false);
@@ -434,38 +524,66 @@ const messagesEndRef = useRef<HTMLDivElement>(null);
      }
    }, [currentSessionId, chatSessions, isStreaming, addChatMessage, setAIThinking, selectedModel, openRouterService]);
 
+  const buildChallengeContext = () => {
+    if (!challengeContext) return "";
+    const examples = challengeContext.examples
+      .map((ex, idx) => {
+        const explanation = ex.explanation ? `\nExplanation: ${ex.explanation}` : "";
+        return `Example ${idx + 1}:\nInput: ${ex.input}\nOutput: ${ex.output}${explanation}`;
+      })
+      .join("\n\n");
+    const constraints = challengeContext.constraints
+      .map((c) => `- ${c}`)
+      .join("\n");
+
+    return [
+      `Problem: ${challengeContext.title}`,
+      "Description:",
+      challengeContext.description,
+      examples ? `Examples:\n${examples}` : "",
+      constraints ? `Constraints:\n${constraints}` : "",
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+  };
+
   const handleTemplate = async (templateId: string) => {
     const template = CODE_TEMPLATES.find(t => t.id === templateId);
     if (!template) return;
     
-    const prompt = template.prompt.replace("{{language}}", language);
+    const promptLanguage = (isChallengeRoute ? challengeLanguage : language) || "javascript";
+    const prompt = template.prompt.replace("{{language}}", promptLanguage);
     await sendMessage(prompt);
     setShowTemplates(false);
   };
 
   const handleQuickAction = async (action: string) => {
-    const code = selectedCode || getCode();
+    const promptLanguage = (isChallengeRoute ? challengeLanguage : language) || "javascript";
+    const code = selectedCode || (isChallengeRoute ? challengeCode : getCode());
     if (!code.trim()) {
       toast.error("No code selected or in editor");
       return;
     }
 
+    const challengeContextText = isChallengeRoute ? buildChallengeContext() : "";
+    const contextBlock = challengeContextText ? `${challengeContextText}\n\n` : "";
+
     let prompt = "";
     switch (action) {
       case "explain":
-        prompt = `Explain this ${language} code in detail:\n\`\`\`${language}\n${code}\n\`\`\``;
+        prompt = `${contextBlock}Explain this ${promptLanguage} code in detail:\n\`\`\`${promptLanguage}\n${code}\n\`\`\``;
         break;
       case "fix":
-        prompt = `Fix any errors or issues in this ${language} code:\n\`\`\`${language}\n${code}\n\`\`\``;
+        prompt = `${contextBlock}Fix any errors or issues in this ${promptLanguage} code:\n\`\`\`${promptLanguage}\n${code}\n\`\`\``;
         break;
       case "optimize":
-        prompt = `Optimize this ${language} code for better performance:\n\`\`\`${language}\n${code}\n\`\`\``;
+        prompt = `${contextBlock}Optimize this ${promptLanguage} code for better performance:\n\`\`\`${promptLanguage}\n${code}\n\`\`\``;
         break;
       case "document":
-        prompt = `Add JSDoc comments to this ${language} code:\n\`\`\`${language}\n${code}\n\`\`\``;
+        prompt = `${contextBlock}Add JSDoc comments to this ${promptLanguage} code:\n\`\`\`${promptLanguage}\n${code}\n\`\`\``;
         break;
       case "test":
-        prompt = `Write unit tests for this ${language} code:\n\`\`\`${language}\n${code}\n\`\`\``;
+        prompt = `${contextBlock}Write unit tests for this ${promptLanguage} code:\n\`\`\`${promptLanguage}\n${code}\n\`\`\``;
         break;
     }
     await sendMessage(prompt);
@@ -473,8 +591,17 @@ const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const insertToEditor = (content: string) => {
     const code = content.replace(/```[\w]*\n?/g, "").replace(/```/g, "").trim();
-    const activeContent = useCodeEditorStore.getState().getCode?.() || "";
-    updateActiveFileContent(activeContent + "\n" + code);
+    if (!code) return;
+
+    if (isChallengeRoute) {
+      const activeContent = challengeCode || "";
+      const next = activeContent ? `${activeContent}\n${code}` : code;
+      setChallengeCode(next);
+    } else {
+      const activeContent = useCodeEditorStore.getState().getCode?.() || "";
+      updateActiveFileContent(activeContent + "\n" + code);
+    }
+
     toast.success("Code inserted to editor!");
   };
 
