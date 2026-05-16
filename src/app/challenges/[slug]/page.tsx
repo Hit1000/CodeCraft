@@ -12,9 +12,54 @@ import CodePanel from "./_components/CodePanel";
 import TestCasePanel from "./_components/TestCasePanel";
 import SubmissionResult from "./_components/SubmissionResult";
 import SubmissionHistory from "./_components/SubmissionHistory";
+import AIChatPanel from "@/app/(root)/_components/AIChatPanel";
 import { Loader2, FileText, History } from "lucide-react";
 import { LANGUAGE_CONFIG } from "@/app/(root)/_constants";
-import { buildExecutableCode, parseExecutionResults } from "@/lib/buildExecutableCode";
+import {
+  buildExecutableCode,
+  parseExecutionResults,
+} from "@/lib/buildExecutableCode";
+
+const STORAGE_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const LANGUAGE_STORAGE_KEY = "cc:challenge:language";
+const LANGUAGE_ORDER = [
+  "python",
+  "javascript",
+  "typescript",
+  "java",
+  "cpp",
+] as const;
+
+const buildCodeStorageKey = (challengeSlug: string, lang: string) =>
+  `cc:challenge:${challengeSlug}:${lang}`;
+
+const readStorage = <T,>(key: string): T | null => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { value: T; expiresAt: number };
+    if (!parsed?.expiresAt || Date.now() > parsed.expiresAt) {
+      localStorage.removeItem(key);
+      return null;
+    }
+    return parsed.value;
+  } catch {
+    return null;
+  }
+};
+
+const writeStorage = (key: string, value: unknown) => {
+  if (typeof window === "undefined") return;
+  try {
+    localStorage.setItem(
+      key,
+      JSON.stringify({ value, expiresAt: Date.now() + STORAGE_TTL_MS }),
+    );
+  } catch {
+    // Ignore storage failures (private mode, quota, etc.)
+  }
+};
 
 export default function ChallengeSolvePage() {
   const params = useParams();
@@ -45,17 +90,21 @@ export default function ChallengeSolvePage() {
   // Fetch driver code + full test cases (separate query for security)
   const driverData = useQuery(
     api.challenges.getDriverCode,
-    challenge?._id ? { challengeId: challenge._id } : "skip"
+    challenge?._id ? { challengeId: challenge._id } : "skip",
   );
 
   const userProgress = useQuery(
     api.challenges.getUserChallengeProgress,
-    user?.id && challenge?._id ? { userId: user.id, challengeId: challenge._id } : "skip"
+    user?.id && challenge?._id
+      ? { userId: user.id, challengeId: challenge._id }
+      : "skip",
   );
 
   const submissions = useQuery(
     api.challengeSubmissions.getHistory,
-    user?.id && challenge?._id ? { userId: user.id, challengeId: challenge._id } : "skip"
+    user?.id && challenge?._id
+      ? { userId: user.id, challengeId: challenge._id }
+      : "skip",
   );
 
   const submitMutation = useMutation(api.challengeSubmissions.submit);
@@ -70,19 +119,82 @@ export default function ChallengeSolvePage() {
     errorMessage?: string;
   } | null>(null);
 
-  // Initialize code from starter or saved progress
+  // Initialize code from local storage, saved progress, or starter code
   useEffect(() => {
-    if (challenge) {
-      if (userProgress?.lastCode) {
-        setCode(userProgress.lastCode);
-        if (userProgress.language) setActiveLanguage(userProgress.language);
-      } else {
-        const starterKey = activeLanguage as keyof typeof challenge.starterCode;
-        const starter = challenge.starterCode[starterKey] ?? challenge.starterCode.javascript ?? challenge.starterCode.python ?? "";
-        setCode(starter);
-      }
+    if (!challenge) return;
+
+    const availableLanguages = LANGUAGE_ORDER.filter(
+      (lang) => challenge.starterCode[lang],
+    );
+
+    if (availableLanguages.length === 0) return;
+
+    const storedLanguage = readStorage<string>(LANGUAGE_STORAGE_KEY);
+    const resolvedLanguage =
+      (storedLanguage &&
+      availableLanguages.includes(
+        storedLanguage as (typeof LANGUAGE_ORDER)[number],
+      )
+        ? storedLanguage
+        : undefined) ??
+      (userProgress?.language &&
+      availableLanguages.includes(
+        userProgress.language as (typeof LANGUAGE_ORDER)[number],
+      )
+        ? userProgress.language
+        : undefined) ??
+      (availableLanguages.includes(
+        activeLanguage as (typeof LANGUAGE_ORDER)[number],
+      )
+        ? activeLanguage
+        : availableLanguages[0]);
+
+    if (resolvedLanguage !== activeLanguage) {
+      setActiveLanguage(resolvedLanguage);
     }
-  }, [challenge?._id]); // eslint-disable-line react-hooks/exhaustive-deps
+
+    const storedCode = readStorage<string>(
+      buildCodeStorageKey(slug, resolvedLanguage),
+    );
+    if (storedCode) {
+      setCode(storedCode);
+      return;
+    }
+
+    if (userProgress?.lastCode && userProgress.language === resolvedLanguage) {
+      setCode(userProgress.lastCode);
+      return;
+    }
+
+    const starter =
+      challenge.starterCode[
+        resolvedLanguage as keyof typeof challenge.starterCode
+      ] ??
+      challenge.starterCode.javascript ??
+      challenge.starterCode.python ??
+      "";
+
+    setCode(starter);
+  }, [challenge?._id, slug, userProgress?.lastCode, userProgress?.language]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Restore code for the selected language if available
+  useEffect(() => {
+    if (!challenge) return;
+    const storedCode = readStorage<string>(
+      buildCodeStorageKey(slug, activeLanguage),
+    );
+    if (storedCode && storedCode !== code) {
+      setCode(storedCode);
+    }
+  }, [activeLanguage, challenge?._id, slug]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Persist code + preferred language for 7 days
+  useEffect(() => {
+    if (!challenge) return;
+    if (!activeLanguage) return;
+    writeStorage(LANGUAGE_STORAGE_KEY, activeLanguage);
+    writeStorage(buildCodeStorageKey(slug, activeLanguage), code);
+  }, [challenge?._id, slug, activeLanguage, code]);
 
   // Find prev/next challenges
   const prevNext = useCallback(() => {
@@ -97,12 +209,27 @@ export default function ChallengeSolvePage() {
 
   const { prev, next } = prevNext();
 
-  const executeCode = async (codeToRun: string, language: string, testCases: { id: string; input: string; expectedOutput: string; isHidden: boolean }[]) => {
+  const executeCode = async (
+    codeToRun: string,
+    language: string,
+    testCases: {
+      id: string;
+      input: string;
+      expectedOutput: string;
+      isHidden: boolean;
+    }[],
+  ) => {
     const runtime = LANGUAGE_CONFIG[language]?.pistonRuntime;
     if (!runtime) return null;
 
-    const driverTemplate = driverData?.driverCode?.[language as keyof typeof driverData.driverCode];
-    const fullCode = buildExecutableCode(codeToRun, driverTemplate, testCases, language);
+    const driverTemplate =
+      driverData?.driverCode?.[language as keyof typeof driverData.driverCode];
+    const fullCode = buildExecutableCode(
+      codeToRun,
+      driverTemplate,
+      testCases,
+      language,
+    );
 
     try {
       const response = await fetch("/api/execute", {
@@ -116,7 +243,7 @@ export default function ChallengeSolvePage() {
       });
 
       const data = await response.json();
-      
+
       if (data.message) {
         throw new Error(data.message);
       }
@@ -126,7 +253,10 @@ export default function ChallengeSolvePage() {
 
       return parseExecutionResults(stdout, stderr, testCases);
     } catch (e: any) {
-      const errorMsg = e instanceof Error ? e.message : "Failed to connect to execution server";
+      const errorMsg =
+        e instanceof Error
+          ? e.message
+          : "Failed to connect to execution server";
       return {
         status: "Runtime Error" as const,
         testCasesPassed: 0,
@@ -169,7 +299,11 @@ export default function ChallengeSolvePage() {
     setShowResult(false);
 
     try {
-      const result = await executeCode(codeToSubmit, language, driverData.testCases);
+      const result = await executeCode(
+        codeToSubmit,
+        language,
+        driverData.testCases,
+      );
       if (!result) {
         setIsSubmitting(false);
         return;
@@ -181,7 +315,13 @@ export default function ChallengeSolvePage() {
         challengeId: challenge._id,
         code: codeToSubmit,
         language,
-        status: result.status as "Accepted" | "Wrong Answer" | "Runtime Error" | "Time Limit Exceeded" | "Compilation Error" | "Pending",
+        status: result.status as
+          | "Accepted"
+          | "Wrong Answer"
+          | "Runtime Error"
+          | "Time Limit Exceeded"
+          | "Compilation Error"
+          | "Pending",
         runtime: result.runtime,
         memory: Math.round(Math.random() * 10 + 5), // Approximate (Piston doesn't report memory)
         testCasesPassed: result.testCasesPassed,
@@ -269,20 +409,24 @@ export default function ChallengeSolvePage() {
 
           {/* Tab Content */}
           <div className="flex-1 min-h-0 overflow-hidden">
-            {activeTab === "description" && <ProblemDescription challenge={challenge} />}
+            {activeTab === "description" && (
+              <ProblemDescription challenge={challenge} />
+            )}
             {activeTab === "submissions" && (
               <SubmissionHistory
-                submissions={(submissions ?? []) as Array<{
-                  _id: string;
-                  _creationTime: number;
-                  status: string;
-                  language: string;
-                  runtime: number;
-                  memory: number;
-                  testCasesPassed: number;
-                  totalTestCases: number;
-                  code: string;
-                }>}
+                submissions={
+                  (submissions ?? []) as Array<{
+                    _id: string;
+                    _creationTime: number;
+                    status: string;
+                    language: string;
+                    runtime: number;
+                    memory: number;
+                    testCasesPassed: number;
+                    totalTestCases: number;
+                    code: string;
+                  }>
+                }
                 onLoadCode={handleLoadCode}
               />
             )}
@@ -319,6 +463,8 @@ export default function ChallengeSolvePage() {
           />
         </div>
       </div>
+
+      <AIChatPanel />
     </div>
   );
 }

@@ -112,7 +112,7 @@ async function Header() {
           )}
           
           <Show when="signed-in">
-            <AIChatButton />
+            <AIChatButton label="AI" />
             <RunButton />
             <div className="pl-3 border-l border-gray-800">
               <HeaderProfileBtn />

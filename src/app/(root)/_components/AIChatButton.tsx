@@ -3,7 +3,11 @@ import { useCodeEditorStore } from "@/store/useCodeEditorStore";
 import { MessageSquareIcon } from "lucide-react";
 import { motion } from "framer-motion";
 
-export default function AIChatButton() {
+type AIChatButtonProps = {
+  label?: string;
+};
+
+export default function AIChatButton({ label = "AI Chat" }: AIChatButtonProps) {
   const { toggleChatPanel, isChatPanelOpen } = useCodeEditorStore();
 
   return (
@@ -19,7 +23,7 @@ export default function AIChatButton() {
       title="AI Assistant"
     >
       <MessageSquareIcon className="w-4 h-4" />
-      <span className="text-sm font-medium hidden sm:inline">AI Chat</span>
+      <span className="text-sm font-medium hidden sm:inline">{label}</span>
     </motion.button>
   );
 }

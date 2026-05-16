@@ -7,6 +7,7 @@ import { useMutation } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
 import { useUser } from "@clerk/nextjs";
 import { Id } from "../../../../../convex/_generated/dataModel";
+import AIChatButton from "@/app/(root)/_components/AIChatButton";
 
 interface ProblemNavbarProps {
   challenge: {
@@ -51,6 +52,7 @@ export default function ProblemNavbar({ challenge, isBookmarked, prevSlug, nextS
       </div>
 
       <div className="flex items-center gap-2">
+        <AIChatButton label="AI" />
         <button
           onClick={handleBookmark}
           className={`p-2 rounded-lg transition-all duration-300 ${
