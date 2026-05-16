@@ -10,8 +10,9 @@ import FeatureItem from "./_components/FeatureItem";
 import { Show } from "@clerk/nextjs";
 import UpgradeButton from "./_components/UpgradeButton";
 import LoginButton from "@/components/LoginButton";
+import { Suspense } from "react";
 
-async function PricingPage() {
+async function PricingContent() {
   const user = await currentUser();
   const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
   const convexUser = await convex.query(api.users.getUser, {
@@ -25,8 +26,6 @@ async function PricingPage() {
       className="relative min-h-screen bg-[#0a0a0f] selection:bg-blue-500/20
      selection:text-blue-200"
     >
-      <NavigationHeader />
-
       {/* main content */}
 
       <main className="relative pt-32 pb-24 px-4">
@@ -140,4 +139,34 @@ async function PricingPage() {
     </div>
   );
 }
-export default PricingPage;
+
+function PricingPageSkeleton() {
+  return (
+    <div className="min-h-screen bg-[#0a0a0f] pt-32">
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        <div className="animate-pulse space-y-12">
+          <div className="text-center space-y-4 py-8">
+            <div className="h-10 w-[500px] bg-gray-800/50 rounded mx-auto" />
+            <div className="h-5 w-80 bg-gray-800/50 rounded mx-auto" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="h-48 bg-gray-800/50 rounded-2xl border border-gray-800/50" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <>
+      <NavigationHeader />
+      <Suspense fallback={<PricingPageSkeleton />}>
+        <PricingContent />
+      </Suspense>
+    </>
+  );
+}

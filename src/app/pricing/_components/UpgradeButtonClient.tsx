@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 
 export default function UpgradeButtonClient() {
   const { user } = useUser();
-  const upgradeToPro = useMutation(api.users.upgradeToPro);
+  const selfUpgradeToPro = useMutation(api.users.selfUpgradeToPro);
   const [isLoading, setIsLoading] = useState(false);
 
   const handleUpgrade = async () => {
@@ -20,9 +20,9 @@ export default function UpgradeButtonClient() {
 
     try {
       setIsLoading(true);
-      await upgradeToPro({
-        email: user.primaryEmailAddress?.emailAddress || "",
-        isCheater: true,
+      await selfUpgradeToPro({
+        lemonSqueezyCustomerId: "demo-customer-" + user.id,
+        lemonSqueezyOrderId: "demo-order-" + Date.now(),
       });
       toast.success("Upgraded to Pro successfully!");
     } catch (error) {

@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "convex/react";
+import { Suspense } from "react";
 import { api } from "../../../convex/_generated/api";
 import NavigationHeader from "@/components/NavigationHeader";
 import { Trophy, Medal, Flame, Target, Crown, Award, Star } from "lucide-react";
@@ -16,15 +17,12 @@ const rankConfig: Record<string, { color: string; bg: string; icon: React.ReactN
 
 const topRankColors = ["text-amber-400", "text-gray-300", "text-amber-600"];
 
-export default function LeaderboardPage() {
+function LeaderboardContent() {
   const leaderboard = useQuery(api.challengeLeaderboard.getLeaderboard, { limit: 100 });
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950">
-      <NavigationHeader />
-
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        {/* Page Header */}
+return (
+    <div className="max-w-5xl mx-auto">
+      {/* Page Header */}
         <div className="flex items-center gap-4 mb-8">
           <div className="p-3 rounded-2xl bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/20">
             <Trophy className="w-7 h-7 text-amber-400" />
@@ -160,6 +158,45 @@ export default function LeaderboardPage() {
           </table>
         </div>
       </div>
+  );
+}
+
+function LeaderboardSkeleton() {
+  return (
+    <div className="max-w-5xl mx-auto px-4 py-8 animate-pulse">
+      <div className="flex items-center gap-4 mb-8">
+        <div className="p-3 rounded-2xl bg-gray-800/50 border border-gray-800/50 w-14 h-14" />
+        <div className="space-y-2">
+          <div className="h-8 w-40 bg-gray-800/50 rounded" />
+          <div className="h-4 w-56 bg-gray-800/50 rounded" />
+        </div>
+      </div>
+      <div className="rounded-xl border border-gray-800/60 bg-gray-900/80 overflow-hidden">
+        <div className="h-12 bg-gray-800/30" />
+        {[...Array(10)].map((_, i) => (
+          <div key={i} className="h-16 border-t border-gray-800/50 flex items-center px-5 gap-4">
+            <div className="w-8 h-6 bg-gray-800/50 rounded" />
+            <div className="flex-1 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gray-800/50" />
+              <div className="h-4 w-32 bg-gray-800/50 rounded" />
+            </div>
+            <div className="h-4 w-16 bg-gray-800/50 rounded" />
+            <div className="h-4 w-20 bg-gray-800/50 rounded" />
+            <div className="h-4 w-12 bg-gray-800/50 rounded" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export default function LeaderboardPage() {
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950">
+      <NavigationHeader />
+      <Suspense fallback={<LeaderboardSkeleton />}>
+        <LeaderboardContent />
+      </Suspense>
     </div>
   );
 }

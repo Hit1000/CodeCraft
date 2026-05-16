@@ -373,8 +373,30 @@ export default function ChallengeSolvePage() {
 
   if (!challenge) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-        <Loader2 className="w-6 h-6 text-blue-400 animate-spin" />
+      <div className="h-screen bg-[#0a0a0f] flex flex-col overflow-hidden">
+        <div className="h-14 bg-gray-900/50 border-b border-gray-800/50 animate-pulse" />
+        <div className="flex-1 flex animate-pulse">
+          <div className="w-[45%] border-r border-gray-800/50 p-6 space-y-6">
+            <div className="flex gap-4">
+              <div className="h-8 w-28 bg-gray-800/50 rounded-lg" />
+              <div className="h-8 w-28 bg-gray-800/50 rounded-lg" />
+            </div>
+            <div className="space-y-4">
+              <div className="h-7 w-64 bg-gray-800/50 rounded" />
+              <div className="h-4 w-full bg-gray-800/50 rounded" />
+              <div className="h-4 w-3/4 bg-gray-800/50 rounded" />
+              <div className="h-4 w-5/6 bg-gray-800/50 rounded" />
+              <div className="h-32 bg-gray-800/50 rounded-xl mt-4" />
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col">
+            <div className="flex-1 bg-gray-800/50" />
+            <div className="h-[250px] border-t border-gray-800/50 p-4 space-y-3">
+              <div className="h-5 w-24 bg-gray-800/50 rounded" />
+              <div className="h-20 bg-gray-800/50 rounded-lg" />
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
