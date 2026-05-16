@@ -1,7 +1,83 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown, ChevronRight, Lightbulb, BookOpen } from "lucide-react";
+import { ChevronDown, ChevronRight, Lightbulb, BookOpen, Copy, Check } from "lucide-react";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism";
+
+interface EditorialSegment {
+  type: 'text' | 'code';
+  content: string;
+  language?: string;
+}
+
+function EditorialCodeBlock({ code, language = "python" }: { code: string; language?: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(code);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="relative group/code my-3">
+      <button
+        onClick={handleCopy}
+        className="absolute top-2 right-2 p-1.5 rounded bg-[#1e1e2e] hover:bg-[#2a2a3a] z-10 opacity-0 group-hover/code:opacity-100 transition-opacity flex items-center gap-1"
+        title="Copy code"
+      >
+        {copied ? (
+          <span className="flex items-center gap-1">
+            <Check className="w-3.5 h-3.5 text-green-400" />
+            <span className="text-xs text-green-400">Copied!</span>
+          </span>
+        ) : (
+          <Copy className="w-3.5 h-3.5 text-gray-400" />
+        )}
+      </button>
+      <SyntaxHighlighter
+        style={vscDarkPlus}
+        language={language}
+        PreTag="div"
+        customStyle={{ margin: 0, borderRadius: "0.5rem", fontSize: "0.75rem", padding: "1rem" }}
+      >
+        {code}
+      </SyntaxHighlighter>
+    </div>
+  );
+}
+
+function parseEditorial(editorial: string): EditorialSegment[] {
+  const segments: EditorialSegment[] = [];
+  const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+  
+  let lastIndex = 0;
+  let match;
+  
+  while ((match = codeBlockRegex.exec(editorial)) !== null) {
+    if (match.index > lastIndex) {
+      segments.push({ type: 'text', content: editorial.slice(lastIndex, match.index) });
+    }
+    segments.push({ type: 'code', content: match[2].trim(), language: match[1] || 'python' });
+    lastIndex = match.index + match[0].length;
+  }
+  
+  if (lastIndex < editorial.length) {
+    segments.push({ type: 'text', content: editorial.slice(lastIndex) });
+  }
+  
+  return segments;
+}
+
+function formatEditorialText(text: string): string {
+  return text
+    .replace(/## (.*?)(\n|$)/g, '<h3 class="text-sm font-semibold text-white mt-3 mb-1">$1</h3>')
+    .replace(/### (.*?)(\n|$)/g, '<h4 class="text-xs font-semibold text-gray-300 mt-2 mb-1">$1</h4>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
+    .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 rounded bg-gray-800 text-blue-400 text-xs font-mono">$1</code>')
+    .replace(/\n/g, "<br/>");
+}
 
 interface ProblemDescriptionProps {
   challenge: {
@@ -148,18 +224,19 @@ export default function ProblemDescription({ challenge }: ProblemDescriptionProp
             {showEditorial ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronRight className="w-3.5 h-3.5" />}
           </button>
           {showEditorial && (
-            <div
-              className="mt-3 text-xs text-gray-300 leading-relaxed prose prose-invert prose-sm max-w-none p-4 rounded-xl bg-gray-800/30 border border-gray-700/30"
-              dangerouslySetInnerHTML={{
-                __html: challenge.editorial
-                  .replace(/## (.*?)(\n|$)/g, '<h3 class="text-sm font-semibold text-white mt-3 mb-1">$1</h3>')
-                  .replace(/### (.*?)(\n|$)/g, '<h4 class="text-xs font-semibold text-gray-300 mt-2 mb-1">$1</h4>')
-                  .replace(/\*\*(.*?)\*\*/g, '<strong class="text-white">$1</strong>')
-                  .replace(/`{3}(\w+)?\n([\s\S]*?)`{3}/g, '<pre class="bg-gray-900 rounded-lg p-3 my-2 overflow-x-auto"><code class="text-xs font-mono text-gray-300">$2</code></pre>')
-                  .replace(/`(.*?)`/g, '<code class="px-1 py-0.5 rounded bg-gray-800 text-blue-400 text-xs font-mono">$1</code>')
-                  .replace(/\n/g, "<br/>"),
-              }}
-            />
+            <div className="mt-3 p-4 rounded-xl bg-gray-800/30 border border-gray-700/30">
+              {parseEditorial(challenge.editorial).map((segment, i) => (
+                segment.type === 'code' ? (
+                  <EditorialCodeBlock key={i} code={segment.content} language={segment.language} />
+                ) : (
+                  <div
+                    key={i}
+                    className="text-xs text-gray-300 leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: formatEditorialText(segment.content) }}
+                  />
+                )
+              ))}
+            </div>
           )}
         </div>
       )}
