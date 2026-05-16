@@ -20,10 +20,7 @@ export default function UpgradeButtonClient() {
 
     try {
       setIsLoading(true);
-      await selfUpgradeToPro({
-        lemonSqueezyCustomerId: "demo-customer-" + user.id,
-        lemonSqueezyOrderId: "demo-order-" + Date.now(),
-      });
+      await selfUpgradeToPro();
       toast.success("Upgraded to Pro successfully!");
     } catch (error) {
       console.error(error);

@@ -103,29 +103,23 @@ export const upgradeToPro = mutation({
 });
 
 export const selfUpgradeToPro = mutation({
-  args: {
-    lemonSqueezyCustomerId: v.string(),
-    lemonSqueezyOrderId: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const { identity } = ctx;
-    if (!identity.subject) {
+  args: {},
+  handler: async (ctx) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
       throw new Error("You must be signed in to upgrade");
     }
 
     const user = await ctx.db
       .query("users")
-      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .withIndex("by_user_id", (q) => q.eq("userId", identity.subject))
       .unique();
 
     if (!user) throw new Error("User not found");
-    if (user.isPro) throw new Error("Already a Pro user");
 
     await ctx.db.patch(user._id, {
       isPro: true,
       proSince: Date.now(),
-      lemonSqueezyCustomerId: args.lemonSqueezyCustomerId,
-      lemonSqueezyOrderId: args.lemonSqueezyOrderId,
     });
 
     return { success: true };
