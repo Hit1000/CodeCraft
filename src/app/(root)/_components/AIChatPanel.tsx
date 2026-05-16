@@ -252,6 +252,21 @@ export default function AIChatPanel() {
     updateActiveFileContent,
   } = useCodeEditorStore();
 
+  useEffect(() => {
+    if (isChatPanelOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = "hidden";
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [isChatPanelOpen]);
+
   const pathname = usePathname();
   const isChallengeRoute = pathname?.startsWith("/challenges/") ?? false;
   const {
@@ -623,7 +638,7 @@ const messagesEndRef = useRef<HTMLDivElement>(null);
         animate={{ x: 0, opacity: 1 }}
         exit={{ x: "100%", opacity: 0 }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="fixed right-0 top-0 h-screen w-full md:w-[800px] bg-[#0a0a0f] border-l border-white/[0.05] shadow-2xl z-50 flex flex-col"
+        className="fixed right-0 top-0 h-screen w-[85vw] sm:w-[400px] md:w-[500px] lg:w-[600px] xl:w-[700px] 2xl:w-[800px] max-w-[min(800px,calc(100vw-350px))] bg-[#0a0a0f] border-l border-white/[0.05] shadow-2xl z-50 flex flex-col"
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-white/[0.05] bg-[#0d0d12]">

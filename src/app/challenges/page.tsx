@@ -54,6 +54,9 @@ export default function ChallengesPage() {
   }
 
   const totalChallenges = categories?.reduce((sum, c) => sum + c.count, 0) ?? 0;
+  const easyTotal = categories?.reduce((sum, c) => sum + (c.easy ?? 0), 0) ?? 0;
+  const mediumTotal = categories?.reduce((sum, c) => sum + (c.medium ?? 0), 0) ?? 0;
+  const hardTotal = categories?.reduce((sum, c) => sum + (c.hard ?? 0), 0) ?? 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-900 to-gray-950">
@@ -75,7 +78,7 @@ export default function ChallengesPage() {
 
         {/* Stats Overview */}
         {user && (
-          <StatsOverview stats={userStats ?? null} totalChallenges={totalChallenges} />
+          <StatsOverview stats={userStats ?? null} totalChallenges={totalChallenges} easyTotal={easyTotal} mediumTotal={mediumTotal} hardTotal={hardTotal} />
         )}
 
         {/* Filters */}

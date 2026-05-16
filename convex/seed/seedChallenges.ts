@@ -794,7 +794,7 @@ export const seedChallenges = internalMutation({
         },
         testCases: [
           { id: "tc1", input: "np.array([[0,0],[1,1],[2,2]]), np.array([0,0,1]), np.array([[0.5,0.5]]), 2", expectedOutput: "np.array([0])", isHidden: false },
-          { id: "tc2", input: "np.array([[0,0],[1,1],[2,2],[3,3]]), np.array([0,0,1,1]), np.array([[1.5,1.5]]), 3", expectedOutput: "np.array([1])", isHidden: false },
+          { id: "tc2", input: "np.array([[0,0],[1,1],[2,2],[3,3]]), np.array([0,0,1,1]), np.array([[1.5,1.5]]), 3", expectedOutput: "np.array([0])", isHidden: false },
           { id: "tc3", input: "np.array([[0],[1],[2],[3],[4],[5]]), np.array([0,0,0,1,1,1]), np.array([[2.5]]), 5", expectedOutput: "np.array([0])", isHidden: true },
         ],
         hints: [

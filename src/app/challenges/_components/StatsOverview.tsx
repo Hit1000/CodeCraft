@@ -12,11 +12,18 @@ interface StatsOverviewProps {
     maxStreak: number;
   } | null;
   totalChallenges: number;
+  easyTotal: number;
+  mediumTotal: number;
+  hardTotal: number;
 }
 
-export default function StatsOverview({ stats, totalChallenges }: StatsOverviewProps) {
+export default function StatsOverview({ stats, totalChallenges, easyTotal, mediumTotal, hardTotal }: StatsOverviewProps) {
   const totalSolved = stats?.totalSolved ?? 0;
   const progress = totalChallenges > 0 ? Math.round((totalSolved / totalChallenges) * 100) : 0;
+  
+  const easyProgress = easyTotal > 0 ? Math.round((stats?.easySolved ?? 0) / easyTotal * 100) : 0;
+  const mediumProgress = mediumTotal > 0 ? Math.round((stats?.mediumSolved ?? 0) / mediumTotal * 100) : 0;
+  const hardProgress = hardTotal > 0 ? Math.round((stats?.hardSolved ?? 0) / hardTotal * 100) : 0;
   const circumference = 2 * Math.PI * 40;
   const strokeDashoffset = circumference - (progress / 100) * circumference;
 
@@ -65,30 +72,30 @@ export default function StatsOverview({ stats, totalChallenges }: StatsOverviewP
             <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-700"
-                style={{ width: `${stats?.easySolved ? (stats.easySolved / Math.max(totalChallenges, 1)) * 100 : 0}%` }}
+                style={{ width: `${easyProgress}%` }}
               />
             </div>
-            <span className="text-xs text-gray-500 w-8 text-right">{stats?.easySolved ?? 0}</span>
+            <span className="text-xs text-gray-500 w-12 text-right">{stats?.easySolved ?? 0}/{easyTotal}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-amber-400 w-14">Medium</span>
             <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full transition-all duration-700"
-                style={{ width: `${stats?.mediumSolved ? (stats.mediumSolved / Math.max(totalChallenges, 1)) * 100 : 0}%` }}
+                style={{ width: `${mediumProgress}%` }}
               />
             </div>
-            <span className="text-xs text-gray-500 w-8 text-right">{stats?.mediumSolved ?? 0}</span>
+            <span className="text-xs text-gray-500 w-12 text-right">{stats?.mediumSolved ?? 0}/{mediumTotal}</span>
           </div>
           <div className="flex items-center gap-3">
             <span className="text-xs text-rose-400 w-14">Hard</span>
             <div className="flex-1 h-2 bg-gray-800 rounded-full overflow-hidden">
               <div
                 className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full transition-all duration-700"
-                style={{ width: `${stats?.hardSolved ? (stats.hardSolved / Math.max(totalChallenges, 1)) * 100 : 0}%` }}
+                style={{ width: `${hardProgress}%` }}
               />
             </div>
-            <span className="text-xs text-gray-500 w-8 text-right">{stats?.hardSolved ?? 0}</span>
+            <span className="text-xs text-gray-500 w-12 text-right">{stats?.hardSolved ?? 0}/{hardTotal}</span>
           </div>
         </div>
 
